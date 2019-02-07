@@ -10,6 +10,7 @@ proc_dir = base_dir+"proc/"
 
 subjs = ["nc_NEM_12"]
 runs = ["1","2","3","4"]
+#runs = ["1"]
 
 notches = [16.7, 24, 50, 62, 100, 150, 200]
 breadths = np.array([0.25, 2.0, 1.5, 0.5, 0.5, 0.5, 0.5])

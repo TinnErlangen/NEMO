@@ -7,7 +7,7 @@ base_dir = "C:/Users/kimca/Documents/MEG_analyses/NEMO/"
 proc_dir = base_dir+"proc/"
 
 subjs = ["nc_NEM_12"]
-runs = ["4"] # runs 3,4 = blocks A+B of experiment
+runs = ["3","4"] # runs 3,4 = blocks A+B of experiment
 
 #dictionary with conditions/triggers
 event_id = {'negative/r1': 110,'positive/r1': 120, 'negative/r2': 130, 'positive/r2': 140,

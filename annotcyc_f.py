@@ -9,6 +9,7 @@ base_dir = "C:/Users/kimca/Documents/MEG_analyses/NEMO/"
 proc_dir = base_dir+"proc/"
 subjs = ["nc_NEM_12"]
 runs = ["1","2","3","4"]
+#runs = ["1"]
 
 #collecting the files for annotation
 filelist = []
@@ -25,10 +26,10 @@ class Cycler():
     def go(self):
         self.fn = self.filelist.pop()
         self.epo = mne.read_epochs(self.fn)
-        self.epo.plot(n_epochs=12,n_channels=128) #these parameters work well for inspection of my 2sec epochs
+        self.epo.plot(n_epochs=12,n_channels=128,scalings=dict(mag=4e-12)) #these parameters work well for inspection of my 2sec epochs
 
     def plot(self,n_epochs=12,n_channels=128):
-        self.epo.plot(n_epochs=n_epochs,n_channels=n_channels)
+        self.epo.plot(n_epochs=n_epochs,n_channels=n_channels,scalings=dict(mag=4e-12))
 
     def show_file(self):
         print("Current Epoch File: " + self.fn)
@@ -39,6 +40,10 @@ class Cycler():
             with open(self.fn[:-8]+'_badchans.txt', "w") as file:
                 for b in self.epo.info["bads"]:
                     file.write(b+"\n")
+        with open(self.fn[:-8]+'_epodrops.txt', "w") as file:
+            for inx,d in enumerate(self.epo.drop_log):
+                if d == ['USER']:
+                    file.write("Epoch No. {inx} Condition {trig}\n".format(inx=inx+1,trig=self.epo.events[inx, 2]))
 
 cyc = Cycler(filelist)
 
