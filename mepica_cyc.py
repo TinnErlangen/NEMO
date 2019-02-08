@@ -9,7 +9,7 @@ base_dir = "C:/Users/kimca/Documents/MEG_analyses/NEMO/"
 proc_dir = base_dir+"proc/"
 subjs = ["nc_NEM_12"]
 runs = ["1","2","3","4"]
-runs=["1"]
+#runs=["2","3","4"]
 
 #collecting the files : triplets of annotated epoch file and corresponding reference and MEG ica result files
 filelist = []
@@ -19,7 +19,7 @@ for sub in subjs:
                          '{dir}{sub}_{run}_mepo-ref-ica.fif'.format(dir=proc_dir,sub=sub,run=run),
                          '{dir}{sub}_{run}_mepo-meg-ica.fif'.format(dir=proc_dir,sub=sub,run=run)])
 
-ref_comp_num = 2
+ref_comp_num = 4   #number of reference components to be used as 'ground'
 
 #definition of cycler object to go through the file list for component selection and exclusion
 class Cycler():
