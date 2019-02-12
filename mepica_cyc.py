@@ -68,7 +68,7 @@ class Cycler():
         test.load_data()
         test = self.icameg.apply(test,exclude=comps)
         test.plot_psd(fmax=fmax)
-        test.plot(n_epochs=8,n_channels=30)
+        test.plot(n_epochs=8,n_channels=30,scalings=dict(mag=2e-12,ref_meg=3e-12,misc=10))
         self.test = test
 
     def identify_ref(self,threshold=4):
@@ -83,12 +83,12 @@ class Cycler():
         #when saving, enter the MEG components to be excluded, bad reference components are excluded automatically
     def save(self,comps=None):
         if not comps:
-            self.icameg.apply(self.epo,exclude=self.comps).save(proc_dir+sub+"_"+run+"_ica-epo.fif")
+            self.icameg.apply(self.epo,exclude=self.comps).save(self.fn[0][:-10]+'_ica-epo.fif')
         elif isinstance(comps,list):
-            self.icameg.apply(self.epo,exclude=self.comps+comps).save(proc_dir+sub+"_"+run+"_ica-epo.fif")
+            self.icameg.apply(self.epo,exclude=self.comps+comps).save(self.fn[0][:-10]+'_ica-epo.fif')
         else:
             print("No components applied, saving anyway for consistency")
-            self.epo.save(proc_dir+sub+"_"+run+"_ica-epo.fif")
+            self.epo.save(self.fn[0][:-10]+'_ica-epo.fif')
 
 cyc = Cycler(filelist, ref_comp_num)
 
