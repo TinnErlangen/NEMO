@@ -8,7 +8,7 @@ raw_dir = base_dir+"raw/"
 #location for processed data files
 proc_dir = base_dir+"proc/"
 
-subjs = ["nc_NEM_12"]
+subjs = ["nc_NEM_11"]
 runs = ["1","2","3","4"]
 #runs = ["1"]
 

@@ -1,4 +1,4 @@
-#step 3 - visual inspection an marking of bad epochs
+#step 3 - visual inspection and marking of bad epochs
 
 import mne
 import matplotlib.pyplot as plt
@@ -7,7 +7,7 @@ plt.ion() #this keeps plots interactive
 
 base_dir = "C:/Users/kimca/Documents/MEG_analyses/NEMO/"
 proc_dir = base_dir+"proc/"
-subjs = ["nc_NEM_12"]
+subjs = ["nc_NEM_11"]
 runs = ["1","2","3","4"]
 #runs = ["1"]
 

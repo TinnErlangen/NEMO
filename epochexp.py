@@ -6,7 +6,7 @@ import numpy as np
 base_dir = "C:/Users/kimca/Documents/MEG_analyses/NEMO/"
 proc_dir = base_dir+"proc/"
 
-subjs = ["nc_NEM_12"]
+subjs = ["nc_NEM_11"]
 runs = ["3","4"] # runs 3,4 = blocks A+B of experiment
 
 #dictionary with conditions/triggers

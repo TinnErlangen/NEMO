@@ -6,7 +6,7 @@ import numpy as np
 base_dir = "C:/Users/kimca/Documents/MEG_analyses/NEMO/"
 proc_dir = base_dir+"proc/"
 
-subjs = ["nc_NEM_12"]
+subjs = ["nc_NEM_11"]
 runs = ["2"] # run 2 = tone baseline
 
 #dictionary with conditions/triggers

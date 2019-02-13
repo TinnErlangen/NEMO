@@ -6,7 +6,7 @@ import numpy as np
 base_dir = "C:/Users/kimca/Documents/MEG_analyses/NEMO/"
 proc_dir = base_dir+"proc/"
 
-subjs = ["nc_NEM_12"]
+subjs = ["nc_NEM_11"]
 runs = ["1"] # run 1 = resting state
 
 #dictionary with conditions/triggers
