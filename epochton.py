@@ -6,7 +6,7 @@ import numpy as np
 base_dir = "C:/Users/kimca/Documents/MEG_analyses/NEMO/"
 proc_dir = base_dir+"proc/"
 
-subjs = ["nc_NEM_11"]
+subjs = ["nc_NEM_10","nc_NEM_11","nc_NEM_12","nc_NEM_14","nc_NEM_15","nc_NEM_16"]
 runs = ["2"] # run 2 = tone baseline
 
 #dictionary with conditions/triggers
@@ -48,6 +48,6 @@ for sub in subjs:
         epochs.save(proc_dir+sub+'_'+run+'-epo.fif')
 
         #look at them (optional check)
-        epochs.plot(n_epochs=8,n_channels=10)
-        epochs.plot_psd(fmax=50)
-        epochs.plot_psd_topomap()
+        epochs.plot(n_epochs=8,n_channels=32)
+        epochs.plot_psd(fmax=50,average=False)
+        #epochs.plot_psd_topomap()

@@ -8,12 +8,14 @@ raw_dir = base_dir+"raw/"
 #location for processed data files
 proc_dir = base_dir+"proc/"
 
-subjs = ["nc_NEM_11"]
+subjs = ["nc_NEM_10","nc_NEM_11","nc_NEM_12","nc_NEM_14","nc_NEM_15","nc_NEM_16"]
 runs = ["1","2","3","4"]
-#runs = ["1"]
+#runs = ["4"]
 
-notches = [16.7, 24, 50, 62, 100, 150, 200]
-breadths = np.array([0.25, 2.0, 1.5, 0.5, 0.5, 0.5, 0.5])
+#notches = [16.7, 24, 50, 62, 100, 150, 200]
+notches = [50, 62, 100, 150, 200]
+#breadths = np.array([0.25, 2.0, 1.5, 0.5, 0.5, 0.5, 0.5])
+breadths = np.array([1.5, 0.5, 0.5, 0.5, 0.5])
 
 for sub in subjs:
     sub_path = raw_dir+sub+"/"

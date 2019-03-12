@@ -7,9 +7,9 @@ plt.ion() #this keeps plots interactive
 
 base_dir = "C:/Users/kimca/Documents/MEG_analyses/NEMO/"
 proc_dir = base_dir+"proc/"
-subjs = ["nc_NEM_11"]
+subjs = ["nc_NEM_10","nc_NEM_11","nc_NEM_12","nc_NEM_14","nc_NEM_15","nc_NEM_16"]
 runs = ["1","2","3","4"]
-#runs = ["1"]
+#runs = ["4"]
 
 #collecting the files for annotation
 filelist = []
