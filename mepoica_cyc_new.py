@@ -13,7 +13,7 @@ subjs = ["nc_NEM_10","nc_NEM_11","nc_NEM_12","nc_NEM_14","nc_NEM_15","nc_NEM_16"
         "nc_NEM_23","nc_NEM_24","nc_NEM_26","nc_NEM_27","nc_NEM_28",
         "nc_NEM_29","nc_NEM_30","nc_NEM_31","nc_NEM_32","nc_NEM_33","nc_NEM_34",
         "nc_NEM_35","nc_NEM_36","nc_NEM_37"]
-subjs = ["nc_NEM_31"]
+#subjs = ["nc_NEM_31"]
 #subjs = ["nc_NEM_25"]
 runs = ["1","2","3","4"]
 #runs=["1","2","3"]
@@ -27,7 +27,7 @@ for sub in subjs:
                          '{dir}{sub}_{run}_mepo-meg-ica.fif'.format(dir=proc_dir,sub=sub,run=run),
                          '{dir}{sub}_{run}_mepo-ica.fif'.format(dir=proc_dir,sub=sub,run=run)])
 
-ref_comp_num = 20   #number of reference components to be used as 'ground'
+ref_comp_num = 6   #number of reference components to be used as 'ground'
 
 #definition of cycler object to go through the file list for component selection and exclusion
 class Cycler():
@@ -43,7 +43,7 @@ class Cycler():
         self.fn = self.filelist.pop(idx)
         self.epo = mne.read_epochs(self.fn[0])
         self.icaref = mne.preprocessing.read_ica(self.fn[1])
-        self.icameg = mne.preprocessing.read_ica(self.fn[2]
+        self.icameg = mne.preprocessing.read_ica(self.fn[2])
         self.ica = mne.preprocessing.read_ica(self.fn[3])
 
         #housekeeping on reference components, add them to raw data
@@ -58,7 +58,7 @@ class Cycler():
         self.ica.plot_components(picks=list(range(40)))
         self.ica.plot_sources(self.epo, stop=8)
         self.epo.plot(n_channels=64,n_epochs=8,scalings=dict(mag=2e-12,ref_meg=3e-12,misc=10))
-        self.epo.plot_psd(fmax=50,average=False)
+        self.epo.plot_psd(fmax=60,average=False,bandwidth=0.8)
 
     def show_file(self):
         print("Current Epoch File: " + self.fn[0])
@@ -69,19 +69,18 @@ class Cycler():
             method = [method]
         elif not isinstance(method,list):
             raise ValueError('"method" must be string or list.')
-        kwrgs = {}
         for meth in method:
             print(meth)
             if meth == "eog":
-                func = self.ica.find_bads_eog
+                inds, scores = self.ica.find_bads_eog(self.epo)
             elif meth == "ecg":
-                func = self.ica.find_bads_ecg
+                inds, scores = self.ica.find_bads_ecg(self.epo)
             elif meth == "ref":
-                func = self.ica.find_bads_ref
-                kwrgs["threshold"] = threshold
+                inds, scores = self.ica.find_bads_ref(self.epo, method="separate",
+                                                      threshold=threshold,
+                                                      bad_measure="cor")
             else:
                 raise ValueError("Unrecognised method.")
-            inds, scores = func(self.epo, **kwrgs)
             print(inds)
             if inds:
                 self.ica.plot_scores(scores, exclude=inds)
@@ -93,7 +92,7 @@ class Cycler():
             props = self.comps
         self.ica.plot_properties(self.epo,props)
 
-    def without(self,comps=None,fmax=50):
+    def without(self,comps=None,fmax=60):
         # see what the data would look like if we took comps out
         self.comps += self.ica.exclude
         if not comps:
@@ -101,7 +100,7 @@ class Cycler():
         test = self.epo.copy()
         test.load_data()
         test = self.ica.apply(test,exclude=comps)
-        test.plot_psd(fmax=fmax,average=False)
+        test.plot_psd(fmax=fmax,average=False,bandwidth=0.8)
         test.plot(n_epochs=8,n_channels=64,scalings=dict(mag=2e-12,ref_meg=3e-12,misc=10))
         self.test = test
 
