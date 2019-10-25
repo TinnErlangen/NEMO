@@ -80,13 +80,13 @@ for subj in subjs:
 
     # plot differences from pos/neg to tone baseline, and tone vs. resting state
     ton_minus_rest.plot(window_title="ToneBaseline - RestingState",spatial_colors=True)
-    ton_minus_rest.plot_topomap(times=10.5,average=5.0,title="ToneBaseline - RestingState",cmap='RdBu_r')
+    ton_minus_rest.plot_topomap(times=11,average=6.0,title="ToneBaseline - RestingState",cmap='RdBu_r')
     pos_minus_ton.plot(window_title="Positive - ToneBaseline",spatial_colors=True)
-    pos_minus_ton.plot_topomap(times=10.5,average=5.0,title="Positive - ToneBaseline",cmap='RdBu_r')
+    pos_minus_ton.plot_topomap(times=11,average=6.0,title="Positive - ToneBaseline",cmap='RdBu_r')
     neg_minus_ton.plot(window_title="Negative - ToneBaseline",spatial_colors=True)
-    neg_minus_ton.plot_topomap(times=10.5,average=5.0,title="Negative - ToneBaseline",cmap='RdBu_r')
+    neg_minus_ton.plot_topomap(times=11,average=6.0,title="Negative - ToneBaseline",cmap='RdBu_r')
     neg_minus_pos.plot(window_title="Negative - Positive",spatial_colors=True)
-    neg_minus_pos.plot_topomap(times=10.5,average=5.0,title="Negative - Positive",cmap='RdBu_r')
+    neg_minus_pos.plot_topomap(times=11,average=6.0,title="Negative - Positive",cmap='RdBu_r')
 
     # plot differences from pos/neg to tone baseline, and tone vs. resting state
     # ton_minus_rest.plot(window_title="ToneBaseline - RestingState",spatial_colors=True,ylim=dict(mag=[-1.5e-09,1.5e-09]))
