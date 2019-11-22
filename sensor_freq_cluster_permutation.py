@@ -74,3 +74,9 @@ for subj in subjs:
 
 NEM_data = np.delete(NEM_data,[0,1],axis=0)
 print(NEM_data.shape)
+
+chan_connectivity, chans = mne.channels.find_ch_connectivity(epo.info,ch_type='mag')
+
+NEM_anov = [np.squeeze (x) for x in np.split(NEM_data,8,axis=-1)]
+
+t_obs, clusters, cluster_pv, H0 = mne.stats.spatio_temporal_cluster_test([NEM_data],stat_fun = None,connectivity=chan_connectivity, )
