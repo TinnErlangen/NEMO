@@ -1,3 +1,5 @@
+### merge this script with source prep II for new version with common filters ###
+
 import mne
 from mne.beamformer import make_dics,apply_dics_csd
 from mne.time_frequency import csd_morlet,csd_multitaper
