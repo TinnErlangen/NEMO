@@ -1,3 +1,5 @@
+## preparation of source space and forward solutions 
+
 import mne
 from mne.beamformer import make_dics,apply_dics_csd
 from mne.time_frequency import csd_morlet,csd_multitaper
@@ -29,7 +31,7 @@ for meg,mri in sub_dict.items():
     # mne.write_bem_solution("{dir}nc_{meg}-bem.fif".format(dir=meg_dir,meg=meg),bem)
     # mne.viz.plot_bem(subject=mri, subjects_dir=mri_dir,
     #              brain_surfaces='white', src=src, orientation='coronal')
-    # read source and BEM models that have been saved beamformer
+    # read source and BEM models that have been saved
     trans = "{dir}{mri}_{meg}-trans.fif".format(dir=trans_dir,mri=mri,meg=meg)
     src = mne.read_source_spaces("{dir}nc_{meg}-src.fif".format(dir=meg_dir,meg=meg))
     bem = mne.read_bem_solution("{dir}nc_{meg}-bem.fif".format(dir=meg_dir,meg=meg))
