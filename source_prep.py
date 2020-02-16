@@ -1,4 +1,4 @@
-## preparation of source space and forward solutions 
+## preparation of source space and forward solutions
 
 import mne
 from mne.beamformer import make_dics,apply_dics_csd

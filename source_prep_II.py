@@ -4,6 +4,7 @@ import mne
 from mne.beamformer import make_dics,apply_dics_csd
 from mne.time_frequency import csd_morlet,csd_multitaper
 import numpy as np
+import random
 
 ## remember: BRA52, FAO18, WKI71 have fsaverage MRIs (originals were defective); WKI71_fa MRI is also blurry ?!
 
