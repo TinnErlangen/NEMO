@@ -80,14 +80,14 @@ for stc in all_tonbas_gamma:
 NEM_all_stc_tonbas_gamma = stc_gamma_sum / len(sub_dict)
 
 # plot difference N-P on fsaverage
-NEM_all_stc_tonbas_alpha.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
-NEM_all_stc_tonbas_theta.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
-NEM_all_stc_tonbas_beta_low.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
-NEM_all_stc_tonbas_beta_high.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
-NEM_all_stc_tonbas_gamma.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
+# NEM_all_stc_tonbas_alpha.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
+# NEM_all_stc_tonbas_theta.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
+# NEM_all_stc_tonbas_beta_low.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
+# NEM_all_stc_tonbas_beta_high.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
+# NEM_all_stc_tonbas_gamma.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
 
 # prepare source alpha tonbas permutation t-test
-# there are two choices for clustering: normal cluster permutation with step-down p & TFCE with threshold-dict which is more robust (enhances connected peaks, but pushes disconnected ones down) -- choose one 
+# there are two choices for clustering: normal cluster permutation with step-down p & TFCE with threshold-dict which is more robust (enhances connected peaks, but pushes disconnected ones down) -- choose one
 src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
 connectivity = mne.spatial_src_connectivity(src)
 
@@ -96,30 +96,42 @@ a_t_obs, a_clusters, a_cluster_pv, a_H0 = clu_a = mne.stats.spatio_temporal_clus
 # a_t_obs, a_clusters, a_cluster_pv, a_H0 = clu_a = mne.stats.spatio_temporal_cluster_1samp_test(X_alpha_tonbas, threshold = dict(start=0,step=0.2), n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=4, t_power=1, out_type='indices')
 # get significant clusters and plot
 a_good_cluster_inds = np.where(a_cluster_pv < 0.05)[0]
-stc_alpha_clu_summ = mne.stats.summarize_clusters_stc(clu_a, p_thresh=0.05, tstep=0.001, tmin=0, subject='fsaverage', vertices=None)
-stc_alpha_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
+# stc_alpha_clu_summ = mne.stats.summarize_clusters_stc(clu_a, p_thresh=0.05, tstep=0.001, tmin=0, subject='fsaverage', vertices=None)
+# stc_alpha_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
 
 # do permutation t-test and plot it for all other freq bands
 X_theta_tonbas = np.array(X_theta_tonbas)
-th_t_obs, th_clusters, th_cluster_pv, th_H0 = clu_th = mne.stats.spatio_temporal_cluster_1samp_test(X_theta_tonbas, threshold = dict(start=0,step=0.2), n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=4, t_power=1, out_type='indices')
+th_t_obs, th_clusters, th_cluster_pv, th_H0 = clu_th = mne.stats.spatio_temporal_cluster_1samp_test(X_theta_tonbas, n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=4, step_down_p=0.05, t_power=1, out_type='indices')
 th_good_cluster_inds = np.where(th_cluster_pv < 0.05)[0]
-stc_theta_clu_summ = mne.stats.summarize_clusters_stc(clu_th, p_thresh=0.05, tstep=0.001, tmin=0, subject='fsaverage', vertices=None)
-stc_theta_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
+# stc_theta_clu_summ = mne.stats.summarize_clusters_stc(clu_th, p_thresh=0.05, tstep=0.001, tmin=0, subject='fsaverage', vertices=None)
+# stc_theta_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
 
 X_beta_low_tonbas = np.array(X_beta_low_tonbas)
-bl_t_obs, bl_clusters, bl_cluster_pv, bl_H0 = clu_bl = mne.stats.spatio_temporal_cluster_1samp_test(X_beta_low_tonbas, threshold = dict(start=0,step=0.2), n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=4, t_power=1, out_type='indices')
+bl_t_obs, bl_clusters, bl_cluster_pv, bl_H0 = clu_bl = mne.stats.spatio_temporal_cluster_1samp_test(X_beta_low_tonbas, n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=4, step_down_p=0.05, t_power=1, out_type='indices')
 bl_good_cluster_inds = np.where(bl_cluster_pv < 0.05)[0]
-stc_beta_low_clu_summ = mne.stats.summarize_clusters_stc(clu_bl, p_thresh=0.05, tstep=0.001, tmin=0, subject='fsaverage', vertices=None)
-stc_beta_low_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
+# stc_beta_low_clu_summ = mne.stats.summarize_clusters_stc(clu_bl, p_thresh=0.05, tstep=0.001, tmin=0, subject='fsaverage', vertices=None)
+# stc_beta_low_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
 
 X_beta_high_tonbas = np.array(X_beta_high_tonbas)
-bh_t_obs, bh_clusters, bh_cluster_pv, bh_H0 = clu_bh = mne.stats.spatio_temporal_cluster_1samp_test(X_beta_high_tonbas, threshold = dict(start=0,step=0.2), n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=4, t_power=1, out_type='indices')
+bh_t_obs, bh_clusters, bh_cluster_pv, bh_H0 = clu_bh = mne.stats.spatio_temporal_cluster_1samp_test(X_beta_high_tonbas, n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=4, step_down_p=0.05, t_power=1, out_type='indices')
 bh_good_cluster_inds = np.where(bh_cluster_pv < 0.05)[0]
-stc_beta_high_clu_summ = mne.stats.summarize_clusters_stc(clu_bh, p_thresh=0.05, tstep=0.001, tmin=0, subject='fsaverage', vertices=None)
-stc_beta_high_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
+# stc_beta_high_clu_summ = mne.stats.summarize_clusters_stc(clu_bh, p_thresh=0.05, tstep=0.001, tmin=0, subject='fsaverage', vertices=None)
+# stc_beta_high_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
 
 X_gamma_tonbas = np.array(X_gamma_tonbas)
-g_t_obs, g_clusters, g_cluster_pv, g_H0 = clu_g = mne.stats.spatio_temporal_cluster_1samp_test(X_gamma_tonbas, threshold = dict(start=0,step=0.2), n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=4, t_power=1, out_type='indices')
+g_t_obs, g_clusters, g_cluster_pv, g_H0 = clu_g = mne.stats.spatio_temporal_cluster_1samp_test(X_gamma_tonbas, n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=4, step_down_p=0.05, t_power=1, out_type='indices')
 g_good_cluster_inds = np.where(g_cluster_pv < 0.05)[0]
-stc_gamma_clu_summ = mne.stats.summarize_clusters_stc(clu_g, p_thresh=0.05, tstep=0.001, tmin=0, subject='fsaverage', vertices=None)
-stc_gamma_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
+# stc_gamma_clu_summ = mne.stats.summarize_clusters_stc(clu_g, p_thresh=0.05, tstep=0.001, tmin=0, subject='fsaverage', vertices=None)
+# stc_gamma_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
+
+# plot difference N-P in plain t-values on fsaverage
+NEM_all_stc_tonbas_alpha.data = a_t_obs.T
+NEM_all_stc_tonbas_alpha.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(3,4.5,6)})
+NEM_all_stc_tonbas_theta.data = th_t_obs.T
+NEM_all_stc_tonbas_theta.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(3,4.5,6)})
+NEM_all_stc_tonbas_beta_low.data = bl_t_obs.T
+NEM_all_stc_tonbas_beta_low.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(3,4.5,6)})
+NEM_all_stc_tonbas_beta_high.data = bh_t_obs.T
+NEM_all_stc_tonbas_beta_high.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(3,4.5,6)})
+NEM_all_stc_tonbas_gamma.data = g_t_obs.T
+NEM_all_stc_tonbas_gamma.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(3,4.5,6)})
