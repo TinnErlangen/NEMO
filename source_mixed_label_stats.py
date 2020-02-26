@@ -230,10 +230,34 @@ for meg,mri in sub_dict.items():
 # src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
 # connectivity = mne.spatial_src_connectivity(src)
 
+label_tests = [X_label_alpha_diff,X_label_theta_diff,X_label_beta_low_diff,X_label_beta_high_diff,X_label_gamma_diff,X_label_alpha_tonbas,X_label_theta_tonbas,X_label_beta_low_tonbas,X_label_beta_high_tonbas,X_label_gamma_tonbas]
+label_test_fname = ["X_label_alpha_diff","X_label_theta_diff","X_label_beta_low_diff","X_label_beta_high_diff","X_label_gamma_diff","X_label_alpha_tonbas","X_label_theta_tonbas","X_label_beta_low_tonbas","X_label_beta_high_tonbas","X_label_gamma_tonbas"]
+for i,a in enumerate(label_tests):
+    np.save(meg_dir+"{}".format(label_test_fname[i]),a)
+
 # alpha for exp_diff and tonbas
 X_label_alpha_diff = np.array(X_label_alpha_diff)
+X_label_alpha_diff = np.squeeze(X_label_alpha_diff)
 a_t_obs, a_pvals, a_H0 = mne.stats.permutation_t_test(X_label_alpha_diff, n_permutations=10000, tail=0, n_jobs=4, seed=None)
 a_good_pval_inds = np.where(a_pvals < 0.05)[0]
+print("Alpha emo difference significant in label no.s:{}".format(a_good_pval_inds))
+print("With t Values: {}, and p Values: {}".format(a_t_obs[a_good_pval_inds],a_pvals[a_good_pval_inds]))
+print("Significant label names are:")
+for lab_i in a_good_pval_inds:
+    if lab_i < 150:
+        print("{}".format(labels_dest[lab_i]))
+    else:
+        lab_i = lab_i - 150
+        print("{}".format(labels_limb[lab_i]))
+a_next_pval_inds = np.where(a_pvals < 0.1)[0]
+for lab_i in a_next_pval_inds:
+    if lab_i not in a_good_pval_inds:
+        print("marginally sign. label {no} with T={t} and P={p}".format(no=lab_i,t=a_t_obs[lab_i],p=a_pvals[lab_i]))
+        if lab_i < 150:
+            print("{}".format(labels_dest[lab_i]))
+        else:
+            lab_i = lab_i - 150
+            print("{}".format(labels_limb[lab_i]))
 
 X_label_alpha_tonbas = np.array(X_label_alpha_tonbas)
 a_ton_t_obs, a_ton_pvals, a_ton_H0 = mne.stats.permutation_t_test(X_label_alpha_tonbas, n_permutations=10000, tail=0, n_jobs=4, seed=None)

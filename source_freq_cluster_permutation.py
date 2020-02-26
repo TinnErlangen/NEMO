@@ -13,13 +13,15 @@ import random
 meg_dir = "D:/NEMO_analyses/proc/"
 trans_dir = "D:/NEMO_analyses/proc/trans_files/"
 mri_dir = "D:/freesurfer/subjects/"
-sub_dict = {"NEM_14":"FIN23"}
-# # sub_dict = {"NEM_15":"KIL13","NEM_16":"KIO12","NEM_17":"DEN59","NEM_18":"SAG13","NEM_19":"ALC81","NEM_20":"PAG48",
-#               "NEM_21":"WKI71_fa","NEM_22":"EAM11","NEM_23":"FOT12","NEM_24":"BII41","NEM_26":"ENR41",
+sub_dict = {"NEM_21":"WKI71_fa","NEM_22":"EAM11","NEM_23":"FOT12","NEM_24":"BII41","NEM_26":"ENR41",
+            "NEM_27":"HIU14","NEM_28":"WAL70","NEM_29":"KIL72","NEM_30":"DIU11","NEM_31":"BLE94",
+            "NEM_32":"NAG83","NEM_33":"FAO18_fa","NEM_34":"KER27","NEM_35":"MUN79","NEM_36":"BRA52_fa",
+            "NEM_37":"EAM67"}
+# # sub_dict = {"NEM_21":"WKI71_fa","NEM_22":"EAM11","NEM_23":"FOT12","NEM_24":"BII41","NEM_26":"ENR41",
 #               "NEM_27":"HIU14","NEM_28":"WAL70","NEM_29":"KIL72","NEM_30":"DIU11","NEM_31":"BLE94",
 #               "NEM_32":"NAG83","NEM_33":"FAO18_fa","NEM_34":"KER27","NEM_35":"MUN79","NEM_36":"BRA52_fa",
 #               "NEM_37":"EAM67"} # these are waiting for the next batch
-# # sub_dict = {"NEM_10":"GIZ04","NEM_11":"WOO07","NEM_12":"TGH11",} # these are done
+# # sub_dict = {"NEM_10":"GIZ04","NEM_11":"WOO07","NEM_12":"TGH11","NEM_14":"FIN23","NEM_15":"KIL13","NEM_16":"KIO12","NEM_17":"DEN59","NEM_18":"SAG13","NEM_19":"ALC81","NEM_20":"PAG48",} # these are done
 
 for meg,mri in sub_dict.items():
     # load and prepare the MEG data
@@ -31,11 +33,6 @@ for meg,mri in sub_dict.items():
     # override head_position data to append sensor data (just for calculating CSD !)
     rest.info['dev_head_t'] = ton.info['dev_head_t']
     epo_bas = mne.concatenate_epochs([rest,ton])
-    # load the forward models from each experimental block
-    fwd_rest = mne.read_forward_solution("{dir}nc_{meg}_1-fwd.fif".format(dir=meg_dir,meg=meg))
-    fwd_ton =  mne.read_forward_solution("{dir}nc_{meg}_2-fwd.fif".format(dir=meg_dir,meg=meg))
-    fwd_base = mne.read_forward_solution("{dir}nc_{meg}_base-fwd.fif".format(dir=meg_dir,meg=meg))
-    fwd_exp = mne.read_forward_solution("{dir}nc_{meg}_exp-fwd.fif".format(dir=meg_dir,meg=meg))
     # make and save CSDs for 1-90 Hz range
     frequencies = np.linspace(1,90,num=90)
     csd_exp = csd_morlet(epo_exp, frequencies=frequencies, n_jobs=8, n_cycles=7, decim=1)
@@ -50,19 +47,30 @@ for meg,mri in sub_dict.items():
     csd_neg.save("{dir}nc_{meg}-csd_neg_1-90.h5".format(dir=meg_dir,meg=meg))
     csd_pos = csd_morlet(pos, frequencies=frequencies, n_jobs=8, n_cycles=7, decim=1)
     csd_pos.save("{dir}nc_{meg}-csd_pos_1-90.h5".format(dir=meg_dir,meg=meg))
+    del rest, ton, neg, pos
+    # load the forward models from each experimental block
+    fwd_base = mne.read_forward_solution("{dir}nc_{meg}_base-fwd.fif".format(dir=meg_dir,meg=meg))
+    fwd_exp = mne.read_forward_solution("{dir}nc_{meg}_exp-fwd.fif".format(dir=meg_dir,meg=meg))
     # make DICS filters for exp and baseline
     filters_exp = make_dics(epo_exp.info,fwd_exp,csd_exp,pick_ori='max-power',rank=None,inversion='single',weight_norm=None,normalize_fwd=True,real_filter=False)
+    del epo_exp, fwd_exp, csd_exp
     filters_bas = make_dics(epo_bas.info,fwd_base,csd_bas,pick_ori='max-power',rank=None,inversion='single',weight_norm=None,normalize_fwd=True,real_filter=False)
+    del epo_bas, fwd_base, csd_bas
     # apply the DICS beamformers to get source Estimates for (base) rest, tonbas & (exp) ton, neg, pos using common filters & save to file
     stc_rest, freqs_rest = apply_dics_csd(csd_rest,filters_bas)
+    del csd_rest
     stc_rest.save(fname=meg_dir+"nc_{}_stc_rest_1-90".format(meg))
     stc_tonbas, freqs_tonbas = apply_dics_csd(csd_ton,filters_bas)
     stc_tonbas.save(fname=meg_dir+"nc_{}_stc_tonbas_1-90".format(meg))
+    del filters_bas
     stc_ton, freqs_ton = apply_dics_csd(csd_ton,filters_exp)
     stc_ton.save(fname=meg_dir+"nc_{}_stc_ton_1-90".format(meg))
+    del csd_ton
     stc_neg, freqs_neg = apply_dics_csd(csd_neg,filters_exp)
+    del csd_neg
     stc_neg.save(fname=meg_dir+"nc_{}_stc_neg_1-90".format(meg))
     stc_pos, freqs_pos = apply_dics_csd(csd_pos,filters_exp)
+    del csd_pos
     stc_pos.save(fname=meg_dir+"nc_{}_stc_pos_1-90".format(meg))
     # calculate the difference between conditions div. by baseline & save to file (for base and for exp)
     stc_diff_tonbas = (stc_tonbas - stc_rest) / stc_rest
