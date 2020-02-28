@@ -28,23 +28,27 @@ label_test_fname = ["X_label_alpha_diff","X_label_theta_diff","X_label_beta_low_
 for i, test in enumerate(label_test_fname):
     X = np.load(meg_dir+"{}.npy".format(test))
     X = np.squeeze(X)
-    t_obs, pvals, H0 = mne.stats.permutation_t_test(X, n_permutations=10000, tail=0, n_jobs=4, seed=None)
-    good_pval_inds = np.where(pvals < 0.05)[0]
-    print("{t} significant in label no.s:{n}".format(t=test,n=good_pval_inds))
-    print("With t Values: {}, and p Values: {}".format(t_obs[good_pval_inds],pvals[good_pval_inds]))
-    print("Significant label names are:")
-    for lab_i in good_pval_inds:
-        if lab_i < 150:
-            print("{}".format(labels_dest[lab_i]))
-        else:
-            lab_i = lab_i - 150
-            print("{}".format(labels_limb[lab_i]))
-    next_pval_inds = np.where(pvals < 0.1)[0]
-    for lab_i in next_pval_inds:
-        if lab_i not in good_pval_inds:
-            print("marginally sign. label {no} with T={t} and P={p}".format(no=lab_i,t=t_obs[lab_i],p=pvals[lab_i]))
-            if lab_i < 150:
-                print("{}".format(labels_dest[lab_i]))
-            else:
-                lab_i = lab_i - 150
-                print("{}".format(labels_limb[lab_i]))
+    t_obs, pvals, H0 = mne.stats.permutation_t_test(X, n_permutations=1024, tail=0, n_jobs=4, seed=None) # first time done with 10000 permutations
+    # good_pval_inds = np.where(pvals < 0.05)[0]
+    # print("{t} significant in label no.s:{n}".format(t=test,n=good_pval_inds))
+    # print("With t Values: {}, and p Values: {}".format(t_obs[good_pval_inds],pvals[good_pval_inds]))
+    # print("Significant label names are:")
+    # for lab_i in good_pval_inds:
+    #     if lab_i < 150:
+    #         print("{}".format(labels_dest[lab_i]))
+    #     else:
+    #         lab_i = lab_i - 150
+    #         print("{}".format(labels_limb[lab_i]))
+    # next_pval_inds = np.where(pvals < 0.1)[0]
+    # for lab_i in next_pval_inds:
+    #     if lab_i not in good_pval_inds:
+    #         print("marginally sign. label {no} with T={t} and P={p}".format(no=lab_i,t=t_obs[lab_i],p=pvals[lab_i]))
+    #         if lab_i < 150:
+    #             print("{}".format(labels_dest[lab_i]))
+    #         else:
+    #             lab_i = lab_i - 150
+    #             print("{}".format(labels_limb[lab_i]))
+    # print subcortical stats
+    print(test)
+    print(t_obs[150:])
+    print(pvals[150:])

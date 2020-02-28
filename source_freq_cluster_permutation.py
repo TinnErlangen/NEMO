@@ -86,63 +86,65 @@ for meg,mri in sub_dict.items():
     stc_fsavg_diff_emo = morph_exp.apply(stc_diff_emo)
     stc_fsavg_diff_emo.save(fname=meg_dir+"nc_{}_stc_fsavg_diff_emo_1-90".format(meg))
 
-# # now do GROUP ANALYSES - with final subject sample
-#
-# sub_dict = {"NEM_10":"GIZ04","NEM_11":"WOO07","NEM_12":"TGH11","NEM_14":"FIN23","NEM_15":"KIL13","NEM_17":"DEN59","NEM_18":"SAG13",
-#            "NEM_22":"EAM11","NEM_23":"FOT12","NEM_24":"BII41","NEM_26":"ENR41",
-#            "NEM_27":"HIU14","NEM_28":"WAL70","NEM_29":"KIL72",
-#            "NEM_34":"KER27","NEM_36":"BRA52_fa","NEM_16":"KIO12","NEM_20":"PAG48","NEM_31":"BLE94","NEM_35":"MUN79"}
-# excluded = {"NEM_30":"DIU11","NEM_32":"NAG83","NEM_33":"FAO18_fa","NEM_37":"EAM67","NEM_19":"ALC81","NEM_21":"WKI71_fa"}
-# # sub_dict = {"NEM_10":"GIZ04","NEM_11":"WOO07","NEM_12":"TGH11","NEM_14":"FIN23","NEM_15":"KIL13",
-#
-# # create lists for saving individual stcs to be averaged later on
-# all_diff_tonbas=[]
-# all_diff_emo=[]
-# # create lists to collect freq difference stc data arrays for permutation t test on source
-# X_tonbas_diff = []
-# X_emo_diff = []
-#
-# for meg,mri in sub_dict.items():
-#     # load and prepare the STC data
-#     stc_fsavg_diff_tonbas = mne.read_source_estimate("{}nc_{}_stc_fsavg_diff_tonbas_1-90".format(meg_dir,meg), subject='fsaverage')  ## works without file ending like this (loads both lh and rh)
-#     stc_fsavg_diff_emo = mne.read_source_estimate("{}nc_{}_stc_fsavg_diff_emo_1-90".format(meg_dir,meg), subject='fsaverage')
-#     # collect the individual stcs into lists for averaging later
-#     all_diff_tonbas.append(stc_fsavg_diff_tonbas)
-#     X_tonbas_diff.append(stc_fsavg_diff_tonbas.data.T)
-#     all_diff_emo.append(stc_fsavg_diff_emo)
-#     X_emo_diff.append(stc_fsavg_diff_emo.data.T)
-#
-# # create STC averages over all subjects for plotting - tonbas & emo
-# stc_tonbas_sum = all_diff_tonbas.pop()
-# for stc in all_diff_tonbas:
-#     stc_tonbas_sum = stc_tonbas_sum + stc
-# NEM_all_stc_diff_tonbas = stc_tonbas_sum / len(sub_dict)
-#
-# stc_emo_sum = all_diff_emo.pop()
-# for stc in all_diff_emo:
-#     stc_emo_sum = stc_emo_sum + stc
-# NEM_all_stc_diff_emo = stc_emo_sum / len(sub_dict)
-#
-# # plot differences tonbas-rest and Neg-Pos on fsaverage
-# NEM_all_stc_diff_tonbas.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
-# NEM_all_stc_diff_emo.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
-#
-# # prepare source diff permutation t-test
-# src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
-# connectivity = mne.spatial_src_connectivity(src)
-#
-# # do permutation t-test and plot it for tonbas_diff
-# X_tonbas_diff = np.array(X_tonbas_diff)
-# ton_t_obs, ton_clusters, ton_cluster_pv, ton_H0 = clu_ton = mne.stats.spatio_temporal_cluster_1samp_test(X_tonbas_diff, n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=8, step_down_p=0.05, t_power=1, out_type='indices')
-# # ton_t_obs, ton_clusters, ton_cluster_pv, ton_H0 = clu_ton = mne.stats.spatio_temporal_cluster_1samp_test(X_tonbas_diff, threshold = dict(start=0,step=0.2), n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=8, t_power=1, out_type='indices')
-# ton_good_cluster_inds = np.where(ton_cluster_pv < 0.05)[0]
-# stc_tonbas_clu_summ = mne.stats.summarize_clusters_stc(clu_ton, p_thresh=0.05, tstep=1, tmin=1, subject='fsaverage', vertices=None) # see if have to adjust time parameters for freqs
-# stc_tonbas_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
-#
-# # do permutation t-test and plot it for emo_diff
-# X_emo_diff = np.array(X_emo_diff)
-# emo_t_obs, emo_clusters, emo_cluster_pv, emo_H0 = clu_emo = mne.stats.spatio_temporal_cluster_1samp_test(X_emo_diff, n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=8, step_down_p=0.05, t_power=1, out_type='indices')
-# # emo_t_obs, emo_clusters, emo_cluster_pv, emo_H0 = clu_emo = mne.stats.spatio_temporal_cluster_1samp_test(X_emo_diff, threshold = dict(start=0,step=0.2), n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=8, t_power=1, out_type='indices')
-# emo_good_cluster_inds = np.where(emo_cluster_pv < 0.05)[0]
-# stc_emo_clu_summ = mne.stats.summarize_clusters_stc(clu_emo, p_thresh=0.05, tstep=1, tmin=1, subject='fsaverage', vertices=None) # see if have to adjust time parameters for freqs
-# stc_emo_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
+# now do GROUP ANALYSES - with final subject sample
+
+sub_dict = {"NEM_10":"GIZ04","NEM_11":"WOO07","NEM_12":"TGH11","NEM_14":"FIN23","NEM_15":"KIL13","NEM_17":"DEN59","NEM_18":"SAG13",
+           "NEM_22":"EAM11","NEM_23":"FOT12","NEM_24":"BII41","NEM_26":"ENR41",
+           "NEM_27":"HIU14","NEM_28":"WAL70","NEM_29":"KIL72",
+           "NEM_34":"KER27","NEM_36":"BRA52_fa","NEM_16":"KIO12","NEM_20":"PAG48","NEM_31":"BLE94","NEM_35":"MUN79"}
+excluded = {"NEM_30":"DIU11","NEM_32":"NAG83","NEM_33":"FAO18_fa","NEM_37":"EAM67","NEM_19":"ALC81","NEM_21":"WKI71_fa"}
+# sub_dict = {"NEM_10":"GIZ04","NEM_11":"WOO07","NEM_12":"TGH11","NEM_14":"FIN23","NEM_15":"KIL13",
+
+# create lists for saving individual stcs to be averaged later on
+all_diff_tonbas=[]
+all_diff_emo=[]
+# create lists to collect freq difference stc data arrays for permutation t test on source
+X_tonbas_diff = []
+X_emo_diff = []
+
+for meg,mri in sub_dict.items():
+    # load and prepare the STC data
+    stc_fsavg_diff_tonbas = mne.read_source_estimate("{}nc_{}_stc_fsavg_diff_tonbas_1-90".format(meg_dir,meg), subject='fsaverage')  ## works without file ending like this (loads both lh and rh)
+    stc_fsavg_diff_emo = mne.read_source_estimate("{}nc_{}_stc_fsavg_diff_emo_1-90".format(meg_dir,meg), subject='fsaverage')
+    # collect the individual stcs into lists for averaging later
+    all_diff_tonbas.append(stc_fsavg_diff_tonbas)
+    X_tonbas_diff.append(stc_fsavg_diff_tonbas.data.T)
+    all_diff_emo.append(stc_fsavg_diff_emo)
+    X_emo_diff.append(stc_fsavg_diff_emo.data.T)
+
+# create STC averages over all subjects for plotting - tonbas & emo
+stc_tonbas_sum = all_diff_tonbas.pop()
+for stc in all_diff_tonbas:
+    stc_tonbas_sum = stc_tonbas_sum + stc
+NEM_all_stc_diff_tonbas = stc_tonbas_sum / len(sub_dict)
+
+stc_emo_sum = all_diff_emo.pop()
+for stc in all_diff_emo:
+    stc_emo_sum = stc_emo_sum + stc
+NEM_all_stc_diff_emo = stc_emo_sum / len(sub_dict)
+
+# plot differences tonbas-rest and Neg-Pos on fsaverage
+NEM_all_stc_diff_tonbas.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
+NEM_all_stc_diff_emo.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
+
+# prepare source diff permutation t-test
+src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
+connectivity = mne.spatial_src_connectivity(src)
+
+# do permutation t-test and plot it for tonbas_diff
+X_tonbas_diff = np.array(X_tonbas_diff)
+ton_t_obs, ton_clusters, ton_cluster_pv, ton_H0 = clu_ton = mne.stats.spatio_temporal_cluster_1samp_test(X_tonbas_diff, n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=8, step_down_p=0.05, t_power=1, out_type='indices')
+# ton_t_obs, ton_clusters, ton_cluster_pv, ton_H0 = clu_ton = mne.stats.spatio_temporal_cluster_1samp_test(X_tonbas_diff, threshold = dict(start=0,step=0.2), n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=8, t_power=1, out_type='indices')
+ton_good_cluster_inds = np.where(ton_cluster_pv < 0.05)[0]
+stc_tonbas_clu_summ = mne.stats.summarize_clusters_stc(clu_ton, p_thresh=0.05, tstep=0.001, tmin=0.0, subject='fsaverage', vertices=None) # see if have to adjust time parameters for freqs
+stc_tonbas_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
+brain = stc_tonbas_clu_summ.plot(hemi='both',subjects_dir=mri_dir,time_label='frequency extent (Hz)', size=(800, 800),smoothing_steps=5, clim=dict(kind='value', pos_lims=[0, 1, 10]))
+# brain.save_image('clusters.png')
+
+# do permutation t-test and plot it for emo_diff
+X_emo_diff = np.array(X_emo_diff)
+emo_t_obs, emo_clusters, emo_cluster_pv, emo_H0 = clu_emo = mne.stats.spatio_temporal_cluster_1samp_test(X_emo_diff, n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=8, step_down_p=0.05, t_power=1, out_type='indices')
+# emo_t_obs, emo_clusters, emo_cluster_pv, emo_H0 = clu_emo = mne.stats.spatio_temporal_cluster_1samp_test(X_emo_diff, threshold = dict(start=0,step=0.2), n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=8, t_power=1, out_type='indices')
+emo_good_cluster_inds = np.where(emo_cluster_pv < 0.05)[0]
+stc_emo_clu_summ = mne.stats.summarize_clusters_stc(clu_emo, p_thresh=0.05, tstep=1, tmin=1, subject='fsaverage', vertices=None) # see if have to adjust time parameters for freqs
+stc_emo_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
