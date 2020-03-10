@@ -41,7 +41,7 @@ for meg,mri in sub_dict.items():
     epo_exp = mne.read_epochs("{dir}nc_{sub}_exp-epo.fif".format(dir=meg_dir,sub=meg))
     rest = mne.read_epochs("{dir}nc_{sub}_1_ica-epo.fif".format(dir=meg_dir,sub=meg))
     ton = mne.read_epochs("{dir}nc_{sub}_2_ica-epo.fif".format(dir=meg_dir,sub=meg))
-    # override head_position data to append sensor data (just for calculating CSD !)
+    override head_position data to append sensor data (just for calculating CSD !)
     rest.info['dev_head_t'] = ton.info['dev_head_t']
     epo_bas = mne.concatenate_epochs([rest,ton])
     del rest, ton
@@ -140,6 +140,7 @@ for meg,mri in sub_dict.items():
     stc_pos_beta_low, freqs_pos_beta_low = apply_dics_csd(csd_pos_beta_low,filters_exp_beta_low)
     stc_pos_beta_high, freqs_pos_beta_high = apply_dics_csd(csd_pos_beta_high,filters_exp_beta_high)
     stc_pos_gamma, freqs_pos_gamma = apply_dics_csd(csd_pos_gamma,filters_exp_gamma)
+    # using tone baseline for contrast
     stc_diff_alpha = (stc_neg_alpha - stc_pos_alpha) / stc_ton_alpha
     stc_diff_theta = (stc_neg_theta - stc_pos_theta) / stc_ton_theta
     stc_diff_beta_low = (stc_neg_beta_low - stc_pos_beta_low) / stc_ton_beta_low
@@ -150,6 +151,17 @@ for meg,mri in sub_dict.items():
     stc_diff_beta_low.save(fname=meg_dir+"nc_{}_stc_limb_mix_diff_beta_low".format(meg))
     stc_diff_beta_high.save(fname=meg_dir+"nc_{}_stc_limb_mix_diff_beta_high".format(meg))
     stc_diff_gamma.save(fname=meg_dir+"nc_{}_stc_limb_mix_diff_gamma".format(meg))
+    # # contrasting conditions without tone baseline  ### this does not make a difference
+    # stc_diff_alpha = (stc_neg_alpha - stc_pos_alpha) / stc_pos_alpha
+    # stc_diff_theta = (stc_neg_theta - stc_pos_theta) / stc_pos_theta
+    # stc_diff_beta_low = (stc_neg_beta_low - stc_pos_beta_low) / stc_pos_beta_low
+    # stc_diff_beta_high = (stc_neg_beta_high - stc_pos_beta_high) / stc_pos_beta_high
+    # stc_diff_gamma = (stc_neg_gamma - stc_pos_gamma) / stc_pos_gamma
+    # stc_diff_alpha.save(fname=meg_dir+"nc_{}_stc_limb_mix_diff_B_alpha".format(meg))
+    # stc_diff_theta.save(fname=meg_dir+"nc_{}_stc_limb_mix_diff_B_theta".format(meg))
+    # stc_diff_beta_low.save(fname=meg_dir+"nc_{}_stc_limb_mix_diff_B_beta_low".format(meg))
+    # stc_diff_beta_high.save(fname=meg_dir+"nc_{}_stc_limb_mix_diff_B_beta_high".format(meg))
+    # stc_diff_gamma.save(fname=meg_dir+"nc_{}_stc_limb_mix_diff_B_gamma".format(meg))
     # clean memory
     del filters_exp_alpha, filters_exp_theta, filters_exp_beta_low, filters_exp_beta_high, filters_exp_gamma
     del csd_neg_alpha, csd_neg_theta, csd_neg_beta_low, csd_neg_beta_high, csd_neg_gamma
@@ -230,35 +242,39 @@ for meg,mri in sub_dict.items():
 # src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
 # connectivity = mne.spatial_src_connectivity(src)
 
+# version with tone baseline
 label_tests = [X_label_alpha_diff,X_label_theta_diff,X_label_beta_low_diff,X_label_beta_high_diff,X_label_gamma_diff,X_label_alpha_tonbas,X_label_theta_tonbas,X_label_beta_low_tonbas,X_label_beta_high_tonbas,X_label_gamma_tonbas]
 label_test_fname = ["X_label_alpha_diff","X_label_theta_diff","X_label_beta_low_diff","X_label_beta_high_diff","X_label_gamma_diff","X_label_alpha_tonbas","X_label_theta_tonbas","X_label_beta_low_tonbas","X_label_beta_high_tonbas","X_label_gamma_tonbas"]
+# # version without tone baseline  ### this is not needed
+# label_tests = [X_label_alpha_diff,X_label_theta_diff,X_label_beta_low_diff,X_label_beta_high_diff,X_label_gamma_diff]
+# label_test_fname = ["X_label_alpha_B_diff","X_label_theta_B_diff","X_label_beta_low_B_diff","X_label_beta_high_B_diff","X_label_gamma_B_diff"]
 for i,a in enumerate(label_tests):
     np.save(meg_dir+"{}".format(label_test_fname[i]),a)
 
-# alpha for exp_diff and tonbas
-X_label_alpha_diff = np.array(X_label_alpha_diff)
-X_label_alpha_diff = np.squeeze(X_label_alpha_diff)
-a_t_obs, a_pvals, a_H0 = mne.stats.permutation_t_test(X_label_alpha_diff, n_permutations=10000, tail=0, n_jobs=4, seed=None)
-a_good_pval_inds = np.where(a_pvals < 0.05)[0]
-print("Alpha emo difference significant in label no.s:{}".format(a_good_pval_inds))
-print("With t Values: {}, and p Values: {}".format(a_t_obs[a_good_pval_inds],a_pvals[a_good_pval_inds]))
-print("Significant label names are:")
-for lab_i in a_good_pval_inds:
-    if lab_i < 150:
-        print("{}".format(labels_dest[lab_i]))
-    else:
-        lab_i = lab_i - 150
-        print("{}".format(labels_limb[lab_i]))
-a_next_pval_inds = np.where(a_pvals < 0.1)[0]
-for lab_i in a_next_pval_inds:
-    if lab_i not in a_good_pval_inds:
-        print("marginally sign. label {no} with T={t} and P={p}".format(no=lab_i,t=a_t_obs[lab_i],p=a_pvals[lab_i]))
-        if lab_i < 150:
-            print("{}".format(labels_dest[lab_i]))
-        else:
-            lab_i = lab_i - 150
-            print("{}".format(labels_limb[lab_i]))
-
-X_label_alpha_tonbas = np.array(X_label_alpha_tonbas)
-a_ton_t_obs, a_ton_pvals, a_ton_H0 = mne.stats.permutation_t_test(X_label_alpha_tonbas, n_permutations=10000, tail=0, n_jobs=4, seed=None)
-a_ton_good_pval_inds = np.where(a_ton_pvals < 0.05)[0]
+# # alpha for exp_diff and tonbas
+# X_label_alpha_diff = np.array(X_label_alpha_diff)
+# X_label_alpha_diff = np.squeeze(X_label_alpha_diff)
+# a_t_obs, a_pvals, a_H0 = mne.stats.permutation_t_test(X_label_alpha_diff, n_permutations=10000, tail=0, n_jobs=4, seed=None)
+# a_good_pval_inds = np.where(a_pvals < 0.05)[0]
+# print("Alpha emo difference significant in label no.s:{}".format(a_good_pval_inds))
+# print("With t Values: {}, and p Values: {}".format(a_t_obs[a_good_pval_inds],a_pvals[a_good_pval_inds]))
+# print("Significant label names are:")
+# for lab_i in a_good_pval_inds:
+#     if lab_i < 150:
+#         print("{}".format(labels_dest[lab_i]))
+#     else:
+#         lab_i = lab_i - 150
+#         print("{}".format(labels_limb[lab_i]))
+# a_next_pval_inds = np.where(a_pvals < 0.1)[0]
+# for lab_i in a_next_pval_inds:
+#     if lab_i not in a_good_pval_inds:
+#         print("marginally sign. label {no} with T={t} and P={p}".format(no=lab_i,t=a_t_obs[lab_i],p=a_pvals[lab_i]))
+#         if lab_i < 150:
+#             print("{}".format(labels_dest[lab_i]))
+#         else:
+#             lab_i = lab_i - 150
+#             print("{}".format(labels_limb[lab_i]))
+#
+# X_label_alpha_tonbas = np.array(X_label_alpha_tonbas)
+# a_ton_t_obs, a_ton_pvals, a_ton_H0 = mne.stats.permutation_t_test(X_label_alpha_tonbas, n_permutations=10000, tail=0, n_jobs=4, seed=None)
+# a_ton_good_pval_inds = np.where(a_ton_pvals < 0.05)[0]

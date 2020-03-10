@@ -138,7 +138,7 @@ ton_t_obs, ton_clusters, ton_cluster_pv, ton_H0 = clu_ton = mne.stats.spatio_tem
 ton_good_cluster_inds = np.where(ton_cluster_pv < 0.05)[0]
 stc_tonbas_clu_summ = mne.stats.summarize_clusters_stc(clu_ton, p_thresh=0.05, tstep=0.001, tmin=0.0, subject='fsaverage', vertices=None) # see if have to adjust time parameters for freqs
 stc_tonbas_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
-brain = stc_tonbas_clu_summ.plot(hemi='both',subjects_dir=mri_dir,time_label='frequency extent (Hz)', size=(800, 800),smoothing_steps=5, clim=dict(kind='value', pos_lims=[0, 1, 10]))
+# brain = stc_tonbas_clu_summ.plot(hemi='both',subjects_dir=mri_dir,time_label='frequency extent (Hz)', size=(800, 800),smoothing_steps=5, clim=dict(kind='value', pos_lims=[0, 1, 10]))
 # brain.save_image('clusters.png')
 
 # do permutation t-test and plot it for emo_diff
@@ -146,5 +146,5 @@ X_emo_diff = np.array(X_emo_diff)
 emo_t_obs, emo_clusters, emo_cluster_pv, emo_H0 = clu_emo = mne.stats.spatio_temporal_cluster_1samp_test(X_emo_diff, n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=8, step_down_p=0.05, t_power=1, out_type='indices')
 # emo_t_obs, emo_clusters, emo_cluster_pv, emo_H0 = clu_emo = mne.stats.spatio_temporal_cluster_1samp_test(X_emo_diff, threshold = dict(start=0,step=0.2), n_permutations=1024, tail=0, connectivity=connectivity, n_jobs=8, t_power=1, out_type='indices')
 emo_good_cluster_inds = np.where(emo_cluster_pv < 0.05)[0]
-stc_emo_clu_summ = mne.stats.summarize_clusters_stc(clu_emo, p_thresh=0.05, tstep=1, tmin=1, subject='fsaverage', vertices=None) # see if have to adjust time parameters for freqs
+stc_emo_clu_summ = mne.stats.summarize_clusters_stc(clu_emo, p_thresh=0.05, tstep=1.0, tmin=0.0, subject='fsaverage', vertices=None) # see if have to adjust time parameters for freqs
 stc_emo_clu_summ.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,spacing='ico5')
