@@ -3,9 +3,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
+import mne
 
 # file locations / subjects
 base_dir = "D:/NEMO_analyses/behav/"
+proc_dir = "D:/NEMO_analyses/proc/"
+meg_dir = "D:/NEMO_analyses/proc/"
+mri_dir = "D:/freesurfer/subjects/"
 subjs_all = ["NEM_10","NEM_11","NEM_12","NEM_14","NEM_15","NEM_16",
         "NEM_17","NEM_18","NEM_19","NEM_20","NEM_21","NEM_22",
         "NEM_23","NEM_24","NEM_26","NEM_27","NEM_28",
@@ -17,6 +21,10 @@ subjs = ["NEM_10","NEM_11","NEM_12","NEM_14","NEM_15",
          "NEM_23","NEM_24","NEM_26","NEM_27","NEM_28",
          "NEM_29","NEM_31","NEM_34","NEM_35","NEM_36"]
 #subjs = ["NEM_10","NEM_11"]
+sub_dict = {"NEM_10":"GIZ04","NEM_11":"WOO07","NEM_12":"TGH11","NEM_14":"FIN23","NEM_15":"KIL13","NEM_17":"DEN59","NEM_18":"SAG13",
+           "NEM_22":"EAM11","NEM_23":"FOT12","NEM_24":"BII41","NEM_26":"ENR41",
+           "NEM_27":"HIU14","NEM_28":"WAL70","NEM_29":"KIL72",
+           "NEM_34":"KER27","NEM_36":"BRA52_fa","NEM_16":"KIO12","NEM_20":"PAG48","NEM_31":"BLE94","NEM_35":"MUN79"}
 
 # create SUPER DATAFRAME
 subjects = {'Subjects':subjs}
@@ -92,3 +100,33 @@ scl_90 = {"Aggressivität" : [5,1,1,0,2,0,1,4,3,0,4,0,3,1,2,3,0,2,6,1], "Ängstl
 NEMO['ER_ges'] = sek_27['ER_ges']
 NEMO['Angst_ges'] = scl_90['Angst_ges']
 NEMO['Psycho_ges'] = scl_90['Psycho_ges']
+
+## Part 4 -- get STC diff values (Neg-Pos) in the selected ROI labels
+
+label_test_fname = ["X_label_alpha_diff","X_label_theta_diff","X_label_beta_low_diff","X_label_beta_high_diff","X_label_gamma_diff","X_label_gamma_high_diff"]
+labels_limb = ['Left-Thalamus-Proper','Left-Caudate','Left-Putamen','Left-Pallidum','Left-Hippocampus','Left-Amygdala',
+               'Right-Thalamus-Proper','Right-Caudate','Right-Putamen','Right-Pallidum','Right-Hippocampus','Right-Amygdala']
+labels_dest = mne.read_labels_from_annot('GIZ04', parc='aparc.a2009s', subjects_dir=mri_dir)
+
+roi_labs = [155,16,34,92,94,96,6,46,122,124,26,150,64,146,80,70,50,108,48,110,161,17,35,93,95,97,7,47,123,125,27,156,65,147,81,71,51,109,49,111]
+lab_names = []
+for l in labels_dest:
+    lab_names.append(l.name)
+for l in labels_limb:
+    lab_names.append(l)
+roi_names = []
+for roi in roi_labs:
+    roi_names.append(lab_names[roi])
+
+mri_suborder = [0,1,2,3,4,16,5,6,17,7,8,9,10,11,12,13,18,14,19,15]
+
+for i, test in enumerate(label_test_fname):
+    X_unord = np.load(proc_dir+"{}.npy".format(test))  ## comes in mri subject order, needs to be rearranged for dataframe
+    X_unord = np.squeeze(X_unord)
+    # order for subject order for NEMO dataframe
+    X = X_unord[0,:]
+    for ord in mri_suborder[1:]:
+        X = np.vstack((X,X_unord[ord,:]))
+    testname = test[8:]
+    for i,lab in enumerate(roi_labs):
+        NEMO[roi_names[i]+"_"+testname] = X[:,lab]
