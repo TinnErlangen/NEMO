@@ -1,6 +1,7 @@
 import numpy as np
 import mne
 import pandas as pd
+from scipy import stats
 import matplotlib.pyplot as plt
 plt.ion()
 
@@ -68,17 +69,18 @@ for freq,vals in freqs.items():
         stc_sum = stc_sum + stc
     NEM_all_stc_diff = stc_sum / len(subjs)
     # make data array for cluster permutation stats N-P stc vals
-    X_diff = np.array(X_diff)
+    X_diff = np.array(X_diff).squeeze()
     # calculate Pearson's r for each vertex to Ton_Laut Rating of the subject
     X_Rval = np.empty(X_diff.shape[1])
     X_R_Tval = np.empty(X_diff.shape[1])
-    for vert_idx in X_diff.shape[1]:
+    for vert_idx in range(X_diff.shape[1]):
         X_Rval[vert_idx], p = stats.pearsonr(X_diff[:,vert_idx],N_behav['Ton_Laut'])
     # calculate an according t-value for each r
     X_R_Tval = (X_Rval * np.sqrt((len(subjs)-2))) / np.sqrt(1 - X_Rval**2)
 
     # plot uncorrected correlation t-values on fsaverage
-    NEM_all_stc_diff.data = X_R_Tval.T
+    X_R_Tval = np.expand_dims(X_R_Tval, axis=1)
+    NEM_all_stc_diff.data = X_R_Tval
     NEM_all_stc_diff.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(2,4,6)})
 
 
@@ -99,6 +101,6 @@ for freq,vals in freqs.items():
 
 
 
-# plot difference N-P in plain t-values on fsaverage
-NEM_all_stc_diff_gamma_high.data = gh_t_obs.T
-NEM_all_stc_diff_gamma_high.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(2,4,6)})
+# # plot difference N-P in plain t-values on fsaverage
+# NEM_all_stc_diff_gamma_high.data = gh_t_obs.T
+# NEM_all_stc_diff_gamma_high.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(2,4,6)})
