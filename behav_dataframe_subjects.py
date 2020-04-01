@@ -101,32 +101,34 @@ NEMO['ER_ges'] = sek_27['ER_ges']
 NEMO['Angst_ges'] = scl_90['Angst_ges']
 NEMO['Psycho_ges'] = scl_90['Psycho_ges']
 
-## Part 4 -- get STC diff values (Neg-Pos) in the selected ROI labels
+NEMO.to_csv('{}NEMO_behav.csv'.format(proc_dir))
 
-label_test_fname = ["X_label_alpha_diff","X_label_theta_diff","X_label_beta_low_diff","X_label_beta_high_diff","X_label_gamma_diff","X_label_gamma_high_diff"]
-labels_limb = ['Left-Thalamus-Proper','Left-Caudate','Left-Putamen','Left-Pallidum','Left-Hippocampus','Left-Amygdala',
-               'Right-Thalamus-Proper','Right-Caudate','Right-Putamen','Right-Pallidum','Right-Hippocampus','Right-Amygdala']
-labels_dest = mne.read_labels_from_annot('GIZ04', parc='aparc.a2009s', subjects_dir=mri_dir)
-
-roi_labs = [155,16,34,92,94,96,6,46,122,124,26,150,64,146,80,70,50,108,48,110,161,17,35,93,95,97,7,47,123,125,27,156,65,147,81,71,51,109,49,111]
-lab_names = []
-for l in labels_dest:
-    lab_names.append(l.name)
-for l in labels_limb:
-    lab_names.append(l)
-roi_names = []
-for roi in roi_labs:
-    roi_names.append(lab_names[roi])
-
-mri_suborder = [0,1,2,3,4,16,5,6,17,7,8,9,10,11,12,13,18,14,19,15]
-
-for i, test in enumerate(label_test_fname):
-    X_unord = np.load(proc_dir+"{}.npy".format(test))  ## comes in mri subject order, needs to be rearranged for dataframe
-    X_unord = np.squeeze(X_unord)
-    # order for subject order for NEMO dataframe
-    X = X_unord[0,:]
-    for ord in mri_suborder[1:]:
-        X = np.vstack((X,X_unord[ord,:]))
-    testname = test[8:]
-    for i,lab in enumerate(roi_labs):
-        NEMO[roi_names[i]+"_"+testname] = X[:,lab]
+# ## Part 4 -- get STC diff values (Neg-Pos) in the selected ROI labels
+#
+# label_test_fname = ["X_label_alpha_diff","X_label_theta_diff","X_label_beta_low_diff","X_label_beta_high_diff","X_label_gamma_diff","X_label_gamma_high_diff"]
+# labels_limb = ['Left-Thalamus-Proper','Left-Caudate','Left-Putamen','Left-Pallidum','Left-Hippocampus','Left-Amygdala',
+#                'Right-Thalamus-Proper','Right-Caudate','Right-Putamen','Right-Pallidum','Right-Hippocampus','Right-Amygdala']
+# labels_dest = mne.read_labels_from_annot('GIZ04', parc='aparc.a2009s', subjects_dir=mri_dir)
+#
+# roi_labs = [155,16,34,92,94,96,6,46,122,124,26,150,64,146,80,70,50,108,48,110,161,17,35,93,95,97,7,47,123,125,27,156,65,147,81,71,51,109,49,111]
+# lab_names = []
+# for l in labels_dest:
+#     lab_names.append(l.name)
+# for l in labels_limb:
+#     lab_names.append(l)
+# roi_names = []
+# for roi in roi_labs:
+#     roi_names.append(lab_names[roi])
+#
+# mri_suborder = [0,1,2,3,4,16,5,6,17,7,8,9,10,11,12,13,18,14,19,15]
+#
+# for i, test in enumerate(label_test_fname):
+#     X_unord = np.load(proc_dir+"{}.npy".format(test))  ## comes in mri subject order, needs to be rearranged for dataframe
+#     X_unord = np.squeeze(X_unord)
+#     # order for subject order for NEMO dataframe
+#     X = X_unord[0,:]
+#     for ord in mri_suborder[1:]:
+#         X = np.vstack((X,X_unord[ord,:]))
+#     testname = test[8:]
+#     for i,lab in enumerate(roi_labs):
+#         NEMO[roi_names[i]+"_"+testname] = X[:,lab]
