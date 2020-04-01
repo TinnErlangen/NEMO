@@ -67,18 +67,34 @@ for freq,vals in freqs.items():
     for stc in all_diff_plot:
         stc_sum = stc_sum + stc
     NEM_all_stc_diff = stc_sum / len(subjs)
-    # make data array for cluster permutation stats
+    # make data array for cluster permutation stats N-P stc vals
     X_diff = np.array(X_diff)
+    # calculate Pearson's r for each vertex to Ton_Laut Rating of the subject
+    X_Rval = np.empty(X_diff.shape[1])
+    X_R_Tval = np.empty(X_diff.shape[1])
+    for vert_idx in X_diff.shape[1]:
+        X_Rval[vert_idx], p = stats.pearsonr(X_diff[:,vert_idx],N_behav['Ton_Laut'])
+    # calculate an according t-value for each r
+    X_R_Tval = (X_Rval * np.sqrt((len(subjs)-2))) / np.sqrt(1 - X_Rval**2)
+
+    # plot uncorrected correlation t-values on fsaverage
+    NEM_all_stc_diff.data = X_R_Tval.T
+    NEM_all_stc_diff.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(2,4,6)})
 
 
-
-
-
-
-
-# prepare connectivity for cluster stats
-src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
-connectivity = mne.spatial_src_connectivity(src)
+#     # do the random sign flip permutation
+#     n_perms = 1000
+#
+#
+#
+#
+#
+#
+#
+#
+# # prepare connectivity for cluster stats
+# src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
+# connectivity = mne.spatial_src_connectivity(src)
 
 
 
