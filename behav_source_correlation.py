@@ -40,7 +40,7 @@ mri_suborder = [0,1,2,3,4,16,5,6,17,7,8,9,10,11,12,13,18,14,19,15]
 
 freqs = {"theta":list(np.arange(4,7)),"alpha":list(np.arange(8,14)),"beta_low":list(np.arange(17,24)),
          "beta_high":list(np.arange(26,35)),"gamma":(np.arange(35,56)),"gamma_high":(np.arange(65,96))}
-freqs = {"alpha":list(np.arange(8,14))}
+freqs = {"gamma":(np.arange(35,56))}
 cycles = {"theta":5,"alpha":10,"beta_low":20,"beta_high":30,"gamma":35,"gamma_high":35}
 
 # so, first we gotta load a difference STC (N-P) array for every subject (!)
@@ -53,7 +53,7 @@ cycles = {"theta":5,"alpha":10,"beta_low":20,"beta_high":30,"gamma":35,"gamma_hi
 
 # get the behavioral data array ready & choose the variable
 N_behav = pd.read_csv('{}NEMO_behav.csv'.format(proc_dir))
-Behav = np.array(N_behav['Ton_Laut'])
+Behav = np.array(N_behav['Ton_Ang'])
 
 for freq,vals in freqs.items():
 
@@ -81,7 +81,7 @@ for freq,vals in freqs.items():
     # calculate an according t-value for each r
     X_R_Tval = (X_Rval * np.sqrt((len(subjs)-2))) / np.sqrt(1 - X_Rval**2)
     # setup for clustering
-    threshold = 2.09
+    threshold = 3.850
     src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
     connectivity = mne.spatial_src_connectivity(src)
     # find clusters in the T-vals
@@ -121,14 +121,14 @@ for freq,vals in freqs.items():
     # get upper CI bound from cluster mass H0
     clust_threshold = np.quantile(cluster_H0[~np.isnan(cluster_H0)], [.95])
     # good cluster inds
-    good_cluster_inds = np.where(cluster_stats > clust_threshold)[0]
+    good_cluster_inds = np.where(np.abs(cluster_stats) > clust_threshold)[0]
     # then plot good clusters
     if len(good_cluster_inds):
         temp_data = np.zeros((NEM_all_stc_diff.data.shape[0],len(good_cluster_inds)))
         for n,idx in enumerate(np.nditer(good_cluster_inds)):
             temp_data[clusters[idx],n] = NEM_all_stc_diff.data[clusters[idx],0]
-        temp_data[temp_data>0] = 1
+        temp_data[np.abs(temp_data)>0] = 1
         stc_clu = NEM_all_stc_diff.copy()
         stc_clu.data = temp_data
-        stc_clu.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
+        stc_clu.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(0,0.5,1)})
     else: print("No sign. clusters found")
