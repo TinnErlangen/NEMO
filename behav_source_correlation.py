@@ -80,8 +80,11 @@ for freq,vals in freqs.items():
         X_Rval[vert_idx], p = stats.pearsonr(X_diff[:,vert_idx],Behav)
     # calculate an according t-value for each r
     X_R_Tval = (X_Rval * np.sqrt((len(subjs)-2))) / np.sqrt(1 - X_Rval**2)
+    # setup for clustering
+    threshold = 2.09
+    src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
+    connectivity = mne.spatial_src_connectivity(src)
     # find clusters in the T-vals
-    threshold = None
     clusters, cluster_stats = _find_clusters(X_R_Tval,threshold=threshold,
                                                    connectivity=connectivity,
                                                    tail=0)
@@ -93,12 +96,11 @@ for freq,vals in freqs.items():
     # do the random sign flip permutation
     # setup
     n_perms = 1000
-    threshold = None
     cluster_H0 = np.zeros(n_perms)
-    src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
-    connectivity = mne.spatial_src_connectivity(src)
-    # her comes the loop
-    for i in n_perms:
+    # here comes the loop
+    for i in range(n_perms):
+        if i in [10,20,50,100,200,300,400,500,600,700,800,900]:
+            print("{} th iteration".format(i))
         # permute the behavioral values over subjects
         Beh_perm = random.sample(list(Behav),k=len(subjs))
         # calculate Pearson's r for each vertex to Behavioral variable of the subject
@@ -118,13 +120,16 @@ for freq,vals in freqs.items():
             cluster_H0[i] = np.nan
     # get upper CI bound from cluster mass H0
     clust_threshold = np.quantile(cluster_H0[~np.isnan(cluster_H0)], [.95])
-    # see if there are "good" clusters and plot them
+    # good cluster inds
     good_cluster_inds = np.where(cluster_stats > clust_threshold)[0]
+    good_clusters = []
+    # then plot good clusters
     if len(good_cluster_inds):
-        temp_data = np.zeros((NEM_all_atc_diff.data.shape[0],len(good_cluster_inds)))
+        temp_data = np.zeros((NEM_all_stc_diff.data.shape[0],len(good_cluster_inds)))
         for n,idx in enumerate(np.nditer(good_cluster_inds)):
             temp_data[clusters[idx],n] = NEM_all_stc_diff.data[clusters[idx],0]
     temp_data[temp_data>0] = 1
     stc_clu = NEM_all_stc_diff.copy()
     stc_clu.data = temp_data
-    stc_clu.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
+
+    else: print("No sign. clusters found")
