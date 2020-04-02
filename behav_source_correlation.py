@@ -122,14 +122,13 @@ for freq,vals in freqs.items():
     clust_threshold = np.quantile(cluster_H0[~np.isnan(cluster_H0)], [.95])
     # good cluster inds
     good_cluster_inds = np.where(cluster_stats > clust_threshold)[0]
-    good_clusters = []
     # then plot good clusters
     if len(good_cluster_inds):
         temp_data = np.zeros((NEM_all_stc_diff.data.shape[0],len(good_cluster_inds)))
         for n,idx in enumerate(np.nditer(good_cluster_inds)):
             temp_data[clusters[idx],n] = NEM_all_stc_diff.data[clusters[idx],0]
-    temp_data[temp_data>0] = 1
-    stc_clu = NEM_all_stc_diff.copy()
-    stc_clu.data = temp_data
-
+        temp_data[temp_data>0] = 1
+        stc_clu = NEM_all_stc_diff.copy()
+        stc_clu.data = temp_data
+        stc_clu.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
     else: print("No sign. clusters found")
