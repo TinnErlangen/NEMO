@@ -80,8 +80,11 @@ for freq,vals in freqs.items():
         X_Rval[vert_idx], p = stats.pearsonr(X_diff[:,vert_idx],Behav)
     # calculate an according t-value for each r
     X_R_Tval = (X_Rval * np.sqrt((len(subjs)-2))) / np.sqrt(1 - X_Rval**2)
+    # setup for clustering
+    threshold = 2.09
+    src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
+    connectivity = mne.spatial_src_connectivity(src)
     # find clusters in the T-vals
-    threshold = None
     clusters, cluster_stats = _find_clusters(X_R_Tval,threshold=threshold,
                                                    connectivity=connectivity,
                                                    tail=0)
@@ -93,12 +96,11 @@ for freq,vals in freqs.items():
     # do the random sign flip permutation
     # setup
     n_perms = 1000
-    threshold = None
     cluster_H0 = np.zeros(n_perms)
-    src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
-    connectivity = mne.spatial_src_connectivity(src)
     # her comes the loop
-    for i in n_perms:
+    for i in range(n_perms):
+        if i in [10,20,50,100,200,300,400,500,600,700,800,900]:
+            print("{} th iteration".format(i))
         # permute the behavioral values over subjects
         Beh_perm = random.sample(list(Behav),k=len(subjs))
         # calculate Pearson's r for each vertex to Behavioral variable of the subject
@@ -116,21 +118,22 @@ for freq,vals in freqs.items():
             cluster_H0[i] = perm_cluster_stats.max()
         else:
             cluster_H0[i] = np.nan
-    # # now get the CI
-    # # get upper CI bound from cluster mass H0
-    # clust_threshold = np.quantile(cluster_H0[~np.isnan(cluster_H0)], [.95])
-    #
-    # # good cluster inds
-    # good_cluster_inds = np.where(cluster_stats > clust_threshold)[0]
+    # get upper CI bound from cluster mass H0
+    clust_threshold = np.quantile(cluster_H0[~np.isnan(cluster_H0)], [.95])
+    # good cluster inds
+    good_cluster_inds = np.where(cluster_stats > clust_threshold)[0]
+    good_clusters = []
+    # then plot good clusters
+    if len(good_cluster_inds):
+        for i in good_cluster_inds:
+            good_clusters.append(clusters[i])
+        stc_clu = NEM_all_stc_diff.copy()
+        clu_mask = []
+        for clu in good_clusters:
+            for vert_ix in range(stc_clu.data[0]):
+                if vert_ix in clu:
+                    clu_mask.append(1)
+                else:
+                    clu_mask.append(0)
 
-
-
-
-
-
-
-
-
-# prepare connectivity for cluster stats
-src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
-connectivity = mne.spatial_src_connectivity(src)
+    else: print("No sign. clusters found")
