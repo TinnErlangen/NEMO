@@ -1,6 +1,7 @@
 import numpy as np
 import mne
 import pandas as pd
+import random
 from scipy import stats
 import matplotlib.pyplot as plt
 plt.ion()
@@ -39,6 +40,7 @@ mri_suborder = [0,1,2,3,4,16,5,6,17,7,8,9,10,11,12,13,18,14,19,15]
 
 freqs = {"theta":list(np.arange(4,7)),"alpha":list(np.arange(8,14)),"beta_low":list(np.arange(17,24)),
          "beta_high":list(np.arange(26,35)),"gamma":(np.arange(35,56)),"gamma_high":(np.arange(65,96))}
+freqs = {"alpha":list(np.arange(8,14))}
 cycles = {"theta":5,"alpha":10,"beta_low":20,"beta_high":30,"gamma":35,"gamma_high":35}
 
 # so, first we gotta load a difference STC (N-P) array for every subject (!)
@@ -49,8 +51,9 @@ cycles = {"theta":5,"alpha":10,"beta_low":20,"beta_high":30,"gamma":35,"gamma_hi
 # however, I only saved that X_....npy for the gamma_high freq band and for all the label analyses..
 # good thing though is that I can re-order the subjects first here, then collect the X together, and then save the X in the ordered order :)
 
-# get the behavioral data array ready
+# get the behavioral data array ready & choose the variable
 N_behav = pd.read_csv('{}NEMO_behav.csv'.format(proc_dir))
+Behav = np.array(N_behav['Ton_Laut'])
 
 for freq,vals in freqs.items():
 
@@ -70,37 +73,64 @@ for freq,vals in freqs.items():
     NEM_all_stc_diff = stc_sum / len(subjs)
     # make data array for cluster permutation stats N-P stc vals
     X_diff = np.array(X_diff).squeeze()
-    # calculate Pearson's r for each vertex to Ton_Laut Rating of the subject
+    # calculate Pearson's r for each vertex to Behavioral variable of the subject
     X_Rval = np.empty(X_diff.shape[1])
     X_R_Tval = np.empty(X_diff.shape[1])
     for vert_idx in range(X_diff.shape[1]):
-        X_Rval[vert_idx], p = stats.pearsonr(X_diff[:,vert_idx],N_behav['Ton_Laut'])
+        X_Rval[vert_idx], p = stats.pearsonr(X_diff[:,vert_idx],Behav)
     # calculate an according t-value for each r
     X_R_Tval = (X_Rval * np.sqrt((len(subjs)-2))) / np.sqrt(1 - X_Rval**2)
-
+    # find clusters in the T-vals
+    threshold = None
+    clusters, cluster_stats = _find_clusters(X_R_Tval,threshold=threshold,
+                                                   connectivity=connectivity,
+                                                   tail=0)
     # plot uncorrected correlation t-values on fsaverage
     X_R_Tval = np.expand_dims(X_R_Tval, axis=1)
     NEM_all_stc_diff.data = X_R_Tval
     NEM_all_stc_diff.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(2,4,6)})
 
+    # do the random sign flip permutation
+    # setup
+    n_perms = 1000
+    threshold = None
+    cluster_H0 = np.zeros(n_perms)
+    src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
+    connectivity = mne.spatial_src_connectivity(src)
+    # her comes the loop
+    for i in n_perms:
+        # permute the behavioral values over subjects
+        Beh_perm = random.sample(list(Behav),k=len(subjs))
+        # calculate Pearson's r for each vertex to Behavioral variable of the subject
+        XP_Rval = np.empty(X_diff.shape[1])
+        XP_R_Tval = np.empty(X_diff.shape[1])
+        for vert_idx in range(X_diff.shape[1]):
+            XP_Rval[vert_idx], p = stats.pearsonr(X_diff[:,vert_idx],Beh_perm)
+        # calculate an according t-value for each r
+        XP_R_Tval = (XP_Rval * np.sqrt((len(subjs)-2))) / np.sqrt(1 - XP_Rval**2)
+        # now find clusters in the T-vals
+        perm_clusters, perm_cluster_stats = _find_clusters(XP_R_Tval,threshold=threshold,
+                                                       connectivity=connectivity,
+                                                       tail=0)
+        if len(perm_clusters):
+            cluster_H0[i] = perm_cluster_stats.max()
+        else:
+            cluster_H0[i] = np.nan
+    # # now get the CI
+    # # get upper CI bound from cluster mass H0
+    # clust_threshold = np.quantile(cluster_H0[~np.isnan(cluster_H0)], [.95])
+    #
+    # # good cluster inds
+    # good_cluster_inds = np.where(cluster_stats > clust_threshold)[0]
 
-#     # do the random sign flip permutation
-#     n_perms = 1000
-#
-#
-#
-#
-#
-#
-#
-#
-# # prepare connectivity for cluster stats
-# src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
-# connectivity = mne.spatial_src_connectivity(src)
 
 
 
 
-# # plot difference N-P in plain t-values on fsaverage
-# NEM_all_stc_diff_gamma_high.data = gh_t_obs.T
-# NEM_all_stc_diff_gamma_high.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True,colormap='coolwarm',clim={'kind':'value','pos_lims':(2,4,6)})
+
+
+
+
+# prepare connectivity for cluster stats
+src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
+connectivity = mne.spatial_src_connectivity(src)
