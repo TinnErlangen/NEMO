@@ -116,21 +116,15 @@ for freq,vals in freqs.items():
             cluster_H0[i] = perm_cluster_stats.max()
         else:
             cluster_H0[i] = np.nan
-    # # now get the CI
-    # # get upper CI bound from cluster mass H0
-    # clust_threshold = np.quantile(cluster_H0[~np.isnan(cluster_H0)], [.95])
-    #
-    # # good cluster inds
-    # good_cluster_inds = np.where(cluster_stats > clust_threshold)[0]
-
-
-
-
-
-
-
-
-
-# prepare connectivity for cluster stats
-src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
-connectivity = mne.spatial_src_connectivity(src)
+    # get upper CI bound from cluster mass H0
+    clust_threshold = np.quantile(cluster_H0[~np.isnan(cluster_H0)], [.95])
+    # see if there are "good" clusters and plot them
+    good_cluster_inds = np.where(cluster_stats > clust_threshold)[0]
+    if len(good_cluster_inds):
+        temp_data = np.zeros((NEM_all_atc_diff.data.shape[0],len(good_cluster_inds)))
+        for n,idx in enumerate(np.nditer(good_cluster_inds)):
+            temp_data[clusters[idx],n] = NEM_all_stc_diff.data[clusters[idx],0]
+    temp_data[temp_data>0] = 1
+    stc_clu = NEM_all_stc_diff.copy()
+    stc_clu.data = temp_data
+    stc_clu.plot(subjects_dir=mri_dir,subject='fsaverage',surface='white',hemi='both',time_viewer=True)
