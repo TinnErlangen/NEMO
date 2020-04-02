@@ -97,7 +97,7 @@ for freq,vals in freqs.items():
     # setup
     n_perms = 1000
     cluster_H0 = np.zeros(n_perms)
-    # her comes the loop
+    # here comes the loop
     for i in range(n_perms):
         if i in [10,20,50,100,200,300,400,500,600,700,800,900]:
             print("{} th iteration".format(i))
@@ -125,15 +125,11 @@ for freq,vals in freqs.items():
     good_clusters = []
     # then plot good clusters
     if len(good_cluster_inds):
-        for i in good_cluster_inds:
-            good_clusters.append(clusters[i])
-        stc_clu = NEM_all_stc_diff.copy()
-        clu_mask = []
-        for clu in good_clusters:
-            for vert_ix in range(stc_clu.data[0]):
-                if vert_ix in clu:
-                    clu_mask.append(1)
-                else:
-                    clu_mask.append(0)
+        temp_data = np.zeros((NEM_all_stc_diff.data.shape[0],len(good_cluster_inds)))
+        for n,idx in enumerate(np.nditer(good_cluster_inds)):
+            temp_data[clusters[idx],n] = NEM_all_stc_diff.data[clusters[idx],0]
+    temp_data[temp_data>0] = 1
+    stc_clu = NEM_all_stc_diff.copy()
+    stc_clu.data = temp_data
 
     else: print("No sign. clusters found")
