@@ -40,7 +40,7 @@ mri_suborder = [0,1,2,3,4,16,5,6,17,7,8,9,10,11,12,13,18,14,19,15]
 
 freqs = {"theta":list(np.arange(4,7)),"alpha":list(np.arange(8,14)),"beta_low":list(np.arange(17,24)),
          "beta_high":list(np.arange(26,35)),"gamma":(np.arange(35,56)),"gamma_high":(np.arange(65,96))}
-freqs = {"gamma":(np.arange(35,56))}
+freqs = {"theta":list(np.arange(4,7)),"alpha":list(np.arange(8,14)),"beta_low":list(np.arange(17,24)),"beta_high":list(np.arange(26,35))}
 cycles = {"theta":5,"alpha":10,"beta_low":20,"beta_high":30,"gamma":35,"gamma_high":35}
 
 # so, first we gotta load a difference STC (N-P) array for every subject (!)
@@ -80,8 +80,8 @@ for freq,vals in freqs.items():
         X_Rval[vert_idx], p = stats.pearsonr(X_diff[:,vert_idx],Behav)
     # calculate an according t-value for each r
     X_R_Tval = (X_Rval * np.sqrt((len(subjs)-2))) / np.sqrt(1 - X_Rval**2)
-    # setup for clustering
-    threshold = 3.850
+    # setup for clustering -- t-thresholds for N=20: 2.086 (.05), 2.845 (.01), or 3.850 (.001)
+    threshold = 2.845
     src = mne.read_source_spaces("{}fsaverage_ico5-src.fif".format(meg_dir))
     connectivity = mne.spatial_src_connectivity(src)
     # find clusters in the T-vals
