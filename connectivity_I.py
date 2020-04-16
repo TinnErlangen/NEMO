@@ -74,3 +74,19 @@ for i,subj in enumerate(list(sub_dict.keys())):
     mne.write_forward_solution("{dir}nc_{meg}_from-fs_ico4_bas-r-fwd.fif".format(dir=meg_dir,meg=subj), fwd_bas_r,overwrite=True)
     fwd_exp_r = conpy.restrict_forward_to_vertices(fwds_exp[i], vert_inds_exp[i])
     mne.write_forward_solution("{dir}nc_{meg}_from-fs_ico4_exp-r-fwd.fif".format(dir=meg_dir,meg=subj), fwd_exp_r,overwrite=True)
+
+# plot it - based on subject NEM_36 (last)
+fig = mne.viz.plot_alignment(fwd_exp_r['info'],trans=trans,src=fwd_exp_r['src'], meg='sensors',surfaces='white',subjects_dir=mri_dir)
+fig.scene.background = (1, 1, 1)  # white
+g = fig.children[-1].children[0].children[0].glyph.glyph
+g.scale_factor = 0.008
+mlab.view(135, 120, 0.3, [0.01, 0.015, 0.058])
+
+# choose the vertex pairs (based on distance in NEM_36) for which to compute connectivity
+min_pair_dist = 0.03    # in meters
+pairs = conpy.all_to_all_connectivity_pairs(fwd_exp_r, min_dist=min_pair_dist)
+# store the pairs in fsaverage space
+subj_to_fsaverage = conpy.utils.get_morph_src_mapping(fs_src, fwd_exp_r['src'], indices=True, subjects_dir=mri_dir)[1]
+pairs = [[subj_to_fsaverage[v] for v in pairs[0]],
+         [subj_to_fsaverage[v] for v in pairs[1]]]
+np.save("{}NEMO_ico4_connectivity_pairs.npy".format(meg_dir), pairs)
