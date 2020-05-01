@@ -60,7 +60,7 @@ for for freq,vals in freqs.items():
 
     # Perform a permutation test to only retain connections that are part of a significant bundle.
     stats = conpy.cluster_permutation_test(cons['tonbas'], cons['restbas'],cluster_threshold=5, src=fsaverage, n_permutations=1000, verbose=True,
-                                           alpha=0.05, n_jobs=2, seed=10, return_details=True, max_spread=0.01)
+                                           alpha=0.05, n_jobs=4, seed=10, return_details=True, max_spread=0.01)
     connection_indices, bundles, bundle_ts, bundle_ps, H0 = stats
     con_clust = contrast[connection_indices]
 
