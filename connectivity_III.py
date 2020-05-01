@@ -30,7 +30,7 @@ fs_src = mne.read_source_spaces("{}fsaverage_ico4-src.fif".format(meg_dir))
 # first make a group contrast of tone baseline vs. resting state
 
 # for each frequency band:
-for for freq,vals in freqs.items():
+for freq,vals in freqs.items():
     # collect the connectivity objects into a dictionary by condition with a list each containing those of all subjects
     cons = dict()
     for cond in bas_conds:
@@ -56,7 +56,7 @@ for for freq,vals in freqs.items():
 
     # Compute contrast between faces and scrambled pictures
     contrast = ga_con[bas_conds[1]] - ga_con[bas_conds[0]]
-    contrast.save('{dir}NEMO_tonbas_vs_rest_contrast_{f}-avg-connectivity.h5'.format(dir=meg_dir,f=freq)))
+    contrast.save('{dir}NEMO_tonbas_vs_rest_contrast_{f}-avg-connectivity.h5'.format(dir=meg_dir,f=freq))
 
     # Perform a permutation test to only retain connections that are part of a significant bundle.
     stats = conpy.cluster_permutation_test(cons['tonbas'], cons['restbas'],cluster_threshold=5, src=fsaverage, n_permutations=1000, verbose=True,
@@ -69,12 +69,12 @@ for for freq,vals in freqs.items():
                dict(connection_indices=connection_indices,bundles=bundles,bundle_ts=bundle_ts,bundle_ps=bundle_ps,H0=H0), overwrite=True)
 
     # Save the pruned grand average connection object
-    con_clust.save('{dir}NEMO_tonbas_vs_rest_contrast_{f}-pruned-avg-connectivity.h5'.format(dir=meg_dir,f=freq)))
+    con_clust.save('{dir}NEMO_tonbas_vs_rest_contrast_{f}-pruned-avg-connectivity.h5'.format(dir=meg_dir,f=freq))
 
     # Summarize the connectivity in parcels
     labels = mne.read_labels_from_annot('fsaverage', 'aparc.a2009s')
     # del labels[-1]  # drop 'unknown-lh' label
     con_parc = con_clust.parcellate(labels, summary='degree',weight_by_degree=False)
-    con_parc.save('{dir}NEMO_tonbas_vs_rest_contrast_{f}-pruned-label-avg-connectivity.h5'.format(dir=meg_dir,f=freq)))
+    con_parc.save('{dir}NEMO_tonbas_vs_rest_contrast_{f}-pruned-label-avg-connectivity.h5'.format(dir=meg_dir,f=freq))
 
 print('[done]')
