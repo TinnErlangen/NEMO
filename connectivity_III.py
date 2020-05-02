@@ -18,7 +18,7 @@ excluded = {"NEM_30":"DIU11","NEM_32":"NAG83","NEM_33":"FAO18_fa","NEM_37":"EAM6
 # sub_dict = {"NEM_26":"ENR41"}
 freqs = {"theta":list(np.arange(4,7)),"alpha":list(np.arange(8,14)),"beta_low":list(np.arange(17,24)),
          "beta_high":list(np.arange(26,35)),"gamma":(np.arange(35,56)),"gamma_high":(np.arange(65,96))}
-# freqs = {"gamma":(np.arange(35,56))}
+# freqs = {"theta":list(np.arange(4,7)),"alpha":list(np.arange(8,14)),}
 cycles = {"theta":5,"alpha":10,"beta_low":20,"beta_high":30,"gamma":35,"gamma_high":35}
 
 exp_conds = ["exp","ton","neg","pos"]
@@ -40,8 +40,8 @@ for freq,vals in freqs.items():
         for meg,mri in sub_dict.items():
             con_subject = conpy.read_connectivity("{dir}nc_{meg}_{cond}_{freq}-connectivity.h5".format(dir=meg_dir,meg=meg,cond=cond,freq=freq))
             # Morph the Connectivity back to the fsaverage brain.By now, the connection objects should define the same connection pairs between the same vertices.
-            con_fsaverage = con_subject.to_original_src(fsaverage, subjects_dir=mri_dir)
-            cons[condition].append(con_fsaverage)
+            con_fsaverage = con_subject.to_original_src(fs_src, subjects_dir=mri_dir)
+            cons[cond].append(con_fsaverage)
 
     # Average the connection objects. To save memory, we add the data in-place.
     print('Averaging connectivity objects... ', freq)
@@ -59,22 +59,25 @@ for freq,vals in freqs.items():
     contrast.save('{dir}NEMO_tonbas_vs_rest_contrast_{f}-avg-connectivity.h5'.format(dir=meg_dir,f=freq))
 
     # Perform a permutation test to only retain connections that are part of a significant bundle.
-    stats = conpy.cluster_permutation_test(cons['tonbas'], cons['restbas'],cluster_threshold=5, src=fsaverage, n_permutations=1000, verbose=True,
-                                           alpha=0.05, n_jobs=4, seed=10, return_details=True, max_spread=0.01)
+    stats = conpy.cluster_permutation_test(cons['tonbas'], cons['restbas'],cluster_threshold=5, src=fs_src, n_permutations=1000, verbose=True,
+                                           alpha=0.05, n_jobs=2, seed=10, return_details=True, max_spread=0.01)
     connection_indices, bundles, bundle_ts, bundle_ps, H0 = stats
     con_clust = contrast[connection_indices]
 
     # Save some details about the permutation stats to disk
-    write_hdf5('{dir}NEMO_tonbas_vs_rest_contrast_{f}-stats.h5'.format(dir=meg_dir,f=freq)),
-               dict(connection_indices=connection_indices,bundles=bundles,bundle_ts=bundle_ts,bundle_ps=bundle_ps,H0=H0), overwrite=True)
+    write_hdf5('{dir}NEMO_tonbas_vs_rest_contrast_{f}-stats.h5'.format(dir=meg_dir,f=freq),dict(connection_indices=connection_indices,bundles=bundles,bundle_ts=bundle_ts,bundle_ps=bundle_ps,H0=H0),overwrite=True)
 
     # Save the pruned grand average connection object
     con_clust.save('{dir}NEMO_tonbas_vs_rest_contrast_{f}-pruned-avg-connectivity.h5'.format(dir=meg_dir,f=freq))
 
     # Summarize the connectivity in parcels
-    labels = mne.read_labels_from_annot('fsaverage', 'aparc.a2009s')
+    labels = mne.read_labels_from_annot('fsaverage', 'aparc.a2009s',subjects_dir=mri_dir)
     # del labels[-1]  # drop 'unknown-lh' label
     con_parc = con_clust.parcellate(labels, summary='degree',weight_by_degree=False)
     con_parc.save('{dir}NEMO_tonbas_vs_rest_contrast_{f}-pruned-label-avg-connectivity.h5'.format(dir=meg_dir,f=freq))
+    # print them out
+    print("The following conections remain for  ",freq)
+    print(con_clust)
+    print(con_parc)
 
 print('[done]')
