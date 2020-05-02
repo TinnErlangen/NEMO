@@ -15,13 +15,9 @@ sub_dict = {"NEM_10":"GIZ04","NEM_11":"WOO07","NEM_12":"TGH11","NEM_14":"FIN23",
            "NEM_29":"KIL72","NEM_31":"BLE94","NEM_34":"KER27","NEM_35":"MUN79","NEM_36":"BRA52_fa"}  ## order got corrected
 excluded = {"NEM_30":"DIU11","NEM_32":"NAG83","NEM_33":"FAO18_fa","NEM_37":"EAM67","NEM_19":"ALC81","NEM_21":"WKI71_fa"}
 # sub_dict = {"NEM_26":"ENR41"}
-freqs = {"theta":list(np.arange(4,7)),"alpha":list(np.arange(8,14)),"beta_low":list(np.arange(17,24)),
-         "beta_high":list(np.arange(26,35)),"gamma":(np.arange(35,56)),"gamma_high":(np.arange(65,96))}
-# freqs = {"theta":list(np.arange(4,7)),"alpha":list(np.arange(8,14)),}
-cycles = {"theta":5,"alpha":10,"beta_low":20,"beta_high":30,"gamma":35,"gamma_high":35}
 
-
-freq = "theta"
+freqs = ["theta","alpha","beta_low","beta_high","gamma","gamma_high"]
+freq = "gamma_high"
 
 # Read the pruned connectivity estimates
 con = conpy.read_connectivity('{dir}NEMO_tonbas_vs_rest_contrast_{f}-pruned-avg-connectivity.h5'.format(dir=meg_dir,f=freq))
@@ -39,6 +35,7 @@ brain = stc.plot(
     initial_time=0,
     smoothing_steps=5,
     figure=fig,
+    subjects_dir=mri_dir,
 )
 brain.scale_data_colormap(0, 1, stc.data.max(), True)
 brain.add_annotation('aparc.a2009s', borders=2)
@@ -56,5 +53,5 @@ mlab.savefig('{d}tonbas_connectivity_{f}_degree_bottom.png'.format(d=save_dir,f=
 # Plot the connectivity diagram
 fig, _ = con_parc.plot(title='Parcel-wise Connectivity', facecolor='white',
                        textcolor='black', node_edgecolor='white',
-                       colormap='plasma_r', vmin=0, show=False)
-fig.savefig('{d}tonbas_connectivity_{f}_squircle.pdf', bbox_inches='tight')
+                       colormap='plasma_r', vmin=0, show=True)
+fig.savefig('{d}tonbas_connectivity_{f}_squircle.pdf'.format(d=save_dir,f=freq), bbox_inches='tight')
