@@ -53,10 +53,10 @@ cycles = {"theta":5,"alpha":10,"beta_low":20,"beta_high":30,"gamma":35,"gamma_hi
 
 # get the behavioral data array ready & choose the variable
 N_behav = pd.read_csv('{}NEMO_behav.csv'.format(proc_dir))
-Behav = np.array(N_behav['ER_ges'])
-cond = "ER_ges"
-freqs = {"beta_high":list(np.arange(26,35))}
-save_dir = "D:/NEMO_analyses/plots/exp_behav/"
+Behav = np.array(N_behav['Ton_Ang'])
+cond = "Ton_Ang"
+freqs = {"gamma":(np.arange(35,56))}
+save_dir = "D:/NEMO_analyses/plots/exp_behav_new/"
 
 for freq,vals in freqs.items():
 
@@ -118,7 +118,7 @@ for freq,vals in freqs.items():
                                                        connectivity=connectivity,
                                                        tail=0)
         if len(perm_clusters):
-            cluster_H0[i] = perm_cluster_stats.max()
+            cluster_H0[i] = np.abs(perm_cluster_stats).max()     # this should be changed to cluster_H0[i] = np.abs(perm_cluster_stats).max()
         else:
             cluster_H0[i] = np.nan
     # get upper CI bound from cluster mass H0

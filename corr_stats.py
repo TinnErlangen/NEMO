@@ -9,6 +9,7 @@ from warnings import warn
 
 import numpy as np
 import random
+import conpy
 from scipy import stats
 from scipy.cluster.hierarchy import fclusterdata
 from scipy.stats import ttest_1samp
@@ -16,7 +17,7 @@ from mne.parallel import parallel_func
 from mne.utils import logger, verbose, ProgressBar
 
 # from .connectivity import VertexConnectivity
-from .connectivity import VertexConnectivity
+from conpy.connectivity import VertexConnectivity
 
 
 def group_connectivity_ttest(cond1, cond2, df=None, tail=None):
@@ -256,19 +257,21 @@ def cluster_permutation_test(diff_cons, Behav, cluster_threshold, src, alpha=0.0
     # t-test.
     # Xs = np.array([con1.data - con2.data for con1, con2 in zip(cond1, cond2)])
 
+    n_subjs = np.int(diff_cons.shape[0])
     # calculate R and T values for each connection's correlation with the behavioral variable
     X_Rval = np.empty(diff_cons.shape[1])
-    X_R_Tval = np.empty(diff_cons.shape[0])
-    for con_idx in range(diff_cons.shape[0]):
+    X_R_Tval = np.empty(diff_cons.shape[1])
+    for con_idx in range(diff_cons.shape[1]):
         X_Rval[con_idx], p = stats.pearsonr(diff_cons[:,con_idx],Behav)
     # calculate an according t-value for each r
-    X_R_Tval = (X_Rval * np.sqrt((len(subjs)-2))) / np.sqrt(1 - X_Rval**2)
+    X_R_Tval = (X_Rval * np.sqrt((n_subjs-2))) / np.sqrt(1 - X_Rval**2)
 
     # Get the XYZ coordinates for the vertices between which the connectivity
     # is defined.
+    con = conpy.read_connectivity('D:/NEMO_analyses/proc/NEMO_neg_vs_pos_contrast_alpha-avg-connectivity.h5')
     grid_points = np.vstack([s['rr'][v]
-                             for s, v in zip(src, cond1[0].vertices)])
-    grid_points = np.hstack([grid_points[inds] for inds in cond1[0].pairs])
+                             for s, v in zip(src, con.vertices)])
+    grid_points = np.hstack([grid_points[inds] for inds in con.pairs])
 
     logger.info('Forming initial bundles of connectivity...')
     _, bundles, bundle_ts = _do_single_permutation(
@@ -296,13 +299,13 @@ def cluster_permutation_test(diff_cons, Behav, cluster_threshold, src, alpha=0.0
     #               for _ in range(n_permutations)]
     Beh_perms = []
     for i in range(n_permutations):
-        random.sample(list(Behav),k=len(subjs))
+        random.sample(list(Behav),k=n_subjs)
         X_Rval = np.empty(diff_cons.shape[1])
-        X_R_Tval = np.empty(diff_cons.shape[0])
-        for con_idx in range(diff_cons.shape[0]):
+        X_R_Tval = np.empty(diff_cons.shape[1])
+        for con_idx in range(diff_cons.shape[1]):
             X_Rval[con_idx], p = stats.pearsonr(diff_cons[:,con_idx],Behav)
         # calculate an according t-value for each r
-        X_R_Tval = (X_Rval * np.sqrt((len(subjs)-2))) / np.sqrt(1 - X_Rval**2)
+        X_R_Tval = (X_Rval * np.sqrt((n_subjs-2))) / np.sqrt(1 - X_Rval**2)
         Beh_perms.append(X_R_Tval)
 
     def permutations():

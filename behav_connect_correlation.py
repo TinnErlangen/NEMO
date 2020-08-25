@@ -18,10 +18,10 @@ meg_dir = "D:/NEMO_analyses/proc/"
 mri_dir = "D:/freesurfer/subjects/"
 base_dir = "D:/NEMO_analyses/behav/"
 proc_dir = "D:/NEMO_analyses/proc/"
-sub_dict = {"NEM_10":"GIZ04","NEM_11":"WOO07","NEM_12":"TGH11","NEM_14":"FIN23","NEM_15":"KIL13","NEM_17":"DEN59","NEM_18":"SAG13",
-           "NEM_22":"EAM11","NEM_23":"FOT12","NEM_24":"BII41","NEM_26":"ENR41",
-           "NEM_27":"HIU14","NEM_28":"WAL70","NEM_29":"KIL72",
-           "NEM_34":"KER27","NEM_36":"BRA52_fa","NEM_16":"KIO12","NEM_20":"PAG48","NEM_31":"BLE94","NEM_35":"MUN79"}
+sub_dict = {"NEM_10":"GIZ04","NEM_11":"WOO07","NEM_12":"TGH11","NEM_14":"FIN23","NEM_15":"KIL13",
+           "NEM_16":"KIO12","NEM_17":"DEN59","NEM_18":"SAG13","NEM_20":"PAG48","NEM_22":"EAM11",
+           "NEM_23":"FOT12","NEM_24":"BII41","NEM_26":"ENR41","NEM_27":"HIU14","NEM_28":"WAL70",
+           "NEM_29":"KIL72","NEM_31":"BLE94","NEM_34":"KER27","NEM_35":"MUN79","NEM_36":"BRA52_fa"}  ## order got corrected
 excluded_dict = {"NEM_30":"DIU11","NEM_32":"NAG83","NEM_33":"FAO18_fa","NEM_37":"EAM67","NEM_19":"ALC81","NEM_21":"WKI71_fa"}
 # sub_dict = {"NEM_26":"ENR41"}
 subjs_all = ["NEM_10","NEM_11","NEM_12","NEM_14","NEM_15","NEM_16",
@@ -68,7 +68,7 @@ ga_con_diff = conpy.read_connectivity('{dir}NEMO_neg_vs_pos_contrast_{f}-avg-con
 cluster_threshold = 2.845
 
 # Perform a permutation test to only retain connections that are part of a significant bundle.
-stats = corr_stats.cluster_permutation_test(diff_cons,Behav,cluster_threshold=cluster_threshold, src=fs_src, n_permutations=1000, verbose=True,
+stats = corr_stats.cluster_permutation_test(diff_cons,Behav, cluster_threshold=cluster_threshold, src=fs_src, n_permutations=1000, verbose=True,
                                        alpha=0.05, n_jobs=2, seed=10, return_details=True, max_spread=0.01)
 connection_indices, bundles, bundle_ts, bundle_ps, H0 = stats
 con_clust = ga_con_diff[connection_indices]
